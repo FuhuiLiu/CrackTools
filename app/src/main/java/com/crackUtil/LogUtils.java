@@ -1,31 +1,53 @@
 package com.crackUtil;
 
+/**
+ * Created by AqCxBoM on 2017/1/19.
+ */
 import android.util.Log;
 
-/**
- * Created by AqCxBoM on 2016/12/26.
- */
+import java.util.Set;
 
 public class LogUtils {
+    public enum ELogSwitch{ DISABLE, ENABLE}
     public enum ELogLevel{
         NORMAL, NORMAL2, VERBOSE, DEBUG, INFO, WARN, ERROR, ASSERT
     }
-    private final static String TAG = "AqCxBoM";
-    private final static String CT = "Run here!";
-    private static ELogLevel nILogLevel = ELogLevel.INFO;
-    private static void logi(String ct){ Log.i(TAG, ct); }
-    private static void logv(String ct){ Log.v(TAG, ct); }
-    private static void logw(String ct){ Log.w(TAG, ct); }
-    private static void loge(String ct){ Log.e(TAG, ct); }
-    private static void logd(String ct){ Log.d(TAG, ct); }
+    private final static String mTAG = "AqCxBoM";
+    private final static String mCT = "Run here!";
+    private final static String WARNING = "Here got some program!";
+    private final static String WARNINGPRE =
+            "=====================================WARNINGPRE=====================================";
+    private final static String WARNINGSUF =
+            "=====================================WARNINGSUF=====================================";
+    private static ELogSwitch mLogSwitch = ELogSwitch.ENABLE;
+    private static ELogLevel mNLogLevel = ELogLevel.INFO;
+    private static void logi(String ct){ Log.i(mTAG, ct); }
+    private static void logv(String ct){ Log.v(mTAG, ct); }
+    private static void logw(String ct){ Log.w(mTAG, ct); }
+    private static void loge(String ct){ Log.e(mTAG, ct); }
+    private static void logd(String ct){ Log.d(mTAG, ct); }
+    private static ELogLevel getCurLogLevel() { return mNLogLevel; }
+    private static ELogSwitch isLogSwitchStatus() { return mLogSwitch; };
+    private static void setLogSwitchStatus(ELogSwitch switchNow) { mLogSwitch = switchNow; }
+    private static boolean isDisbleLog() { return isLogSwitchStatus() == ELogSwitch.DISABLE ? true : false; }
+    private static boolean isOutLogLevel(ELogLevel lv) {
+        return lv == ELogLevel.ASSERT || lv == ELogLevel.NORMAL2 ? true : false;
+    }
 
     //以下为可供外界调用的接口
-    public static void SetLogLevel(ELogLevel nLevel){ nILogLevel = nLevel; }
-    public static void ResetLogLevel(){ nILogLevel = ELogLevel.INFO;}
+    public static void DisbleLog() { setLogSwitchStatus(ELogSwitch.DISABLE);}
+    public static void SetLogLevel(ELogLevel nLevel){ mNLogLevel = nLevel; }
+    public static void ResetLogLevel(){ mNLogLevel = ELogLevel.INFO;}
+    public static void DOWARNING() {
+        DOLOGONCE(WARNING, ELogLevel.ERROR);
+        //PrintStack();
+    }
 
     public static void PrintStack(){
-        Exception ep = new Exception(TAG);
+        Exception ep = new Exception(mTAG);
+        DOLOGONCE(WARNINGPRE, ELogLevel.ERROR);
         ep.printStackTrace();
+        DOLOGONCE(WARNINGSUF, ELogLevel.ERROR);
     }
 
     public static void LOGI(String ct){ logi(ct); }
@@ -44,37 +66,60 @@ public class LogUtils {
     public static void LOGTAGPATH(String tag, int nIndex){ DOLOG(tag, "Current Index: " + nIndex); }
 
     public static void DOLOG(){
-        if (nILogLevel == ELogLevel.ASSERT || nILogLevel == ELogLevel.NORMAL )
-            return;
-        else
-            switch(nILogLevel){
-            case INFO: LOGI(CT); break;
-            case VERBOSE: LOGV(CT); break;
-            case WARN: LOGW(CT); break;
-            case ERROR: LOGE(CT); break;
-            case DEBUG: LOGD(CT); break; }
+        if (!isOutLogLevel(getCurLogLevel()) && !isDisbleLog()){
+            switch(getCurLogLevel()){
+            case INFO: LOGI(mCT); break;
+            case VERBOSE: LOGV(mCT); break;
+            case WARN: LOGW(mCT); break;
+            case ERROR: LOGE(mCT); break;
+            case DEBUG: LOGD(mCT); break; }
+        }
     }
     public static void DOLOG(String ct){
-        if (nILogLevel == ELogLevel.ASSERT || nILogLevel == ELogLevel.NORMAL )
-            return;
-        else
-            switch(nILogLevel){
+        if (!isOutLogLevel(getCurLogLevel()) && !isDisbleLog()){
+            switch(getCurLogLevel()){
             case INFO: LOGI(ct); break;
             case VERBOSE: LOGV(ct); break;
             case WARN: LOGW(ct); break;
             case ERROR: LOGE(ct); break;
             case DEBUG: LOGD(ct); break; }
+        }
     }
 
     public static void DOLOG(String tag,String ct){
-        if (nILogLevel == ELogLevel.ASSERT || nILogLevel == ELogLevel.NORMAL )
-            return;
-        else
-            switch(nILogLevel){
+        if (!isOutLogLevel(getCurLogLevel()) && !isDisbleLog()){
+            switch(getCurLogLevel()){
             case INFO: LOGITAG(tag, ct); break;
             case VERBOSE: LOGVTAG(tag, ct); break;
             case WARN: LOGWTAG(tag, ct); break;
             case ERROR: LOGETAG(tag, ct); break;
             case DEBUG: LOGDTAG(tag, ct); break; }
+        }
+    }
+    public static void DOLOGONCE(String tag, String ct, ELogLevel lv){
+        ELogLevel curLv = getCurLogLevel();
+        SetLogLevel(lv);
+        if (!isOutLogLevel(getCurLogLevel()) && !isDisbleLog()){
+            switch(getCurLogLevel()){
+            case INFO: LOGITAG(tag, ct); break;
+            case VERBOSE: LOGVTAG(tag, ct); break;
+            case WARN: LOGWTAG(tag, ct); break;
+            case ERROR: LOGETAG(tag, ct); break;
+            case DEBUG: LOGDTAG(tag, ct); break; }
+        }
+        SetLogLevel(curLv);
+    }
+    public static void DOLOGONCE(String ct, ELogLevel lv){
+        ELogLevel curLv = getCurLogLevel();
+        SetLogLevel(lv);
+        if (!isOutLogLevel(getCurLogLevel()) && !isDisbleLog()){
+            switch(getCurLogLevel()){
+            case INFO: LOGI(ct); break;
+            case VERBOSE: LOGV(ct); break;
+            case WARN: LOGW(ct); break;
+            case ERROR: LOGE(ct); break;
+            case DEBUG: LOGD(ct); break; }
+        }
+        SetLogLevel(curLv);
     }
 }
