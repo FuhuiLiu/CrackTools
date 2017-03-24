@@ -3,7 +3,9 @@ package aqcxbom.cracktools;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.crackUtil.AppSign;
 import com.crackUtil.GZipUtils;
+import com.crackUtil.LogUtils;
 
 import java.io.IOException;
 
@@ -13,6 +15,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        String Sig = AppSign.getSign(this);
+        LogUtils.DOLOG(Sig);
     }
 
     private static void GZipTestfun()
