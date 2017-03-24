@@ -6,6 +6,7 @@ import android.os.Bundle;
 import com.crackUtil.AppSign;
 import com.crackUtil.GZipUtils;
 import com.crackUtil.LogUtils;
+import com.crackUtil.PhoneUtils;
 
 import java.io.IOException;
 
@@ -16,8 +17,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String Sig = AppSign.getSign(this);
-        LogUtils.DOLOG(Sig);
+        LogUtils.DOLOG("isSimExist", "" + PhoneUtils.isSimExist(this));
+        LogUtils.DOLOG("isOnline", "" + PhoneUtils.isOnline(this));
+        LogUtils.DOLOG("getIMEI", PhoneUtils.getIMEI(this));
+        LogUtils.DOLOG("getIMSI", PhoneUtils.getIMSI(this));
+        LogUtils.DOLOG("getNetworkOperator", PhoneUtils.getNetworkOperator(this));
+        LogUtils.DOLOG("getProvidersType","" +  PhoneUtils.getProvidersType(this));
+        LogUtils.DOLOG("getLine1Number","" +  PhoneUtils.getLine1Number(this));
+        LogUtils.DOLOG("getSimCountryIso","" +  PhoneUtils.getSimCountryIso(this));
+        LogUtils.DOLOG("getSimSerialNumber","" +  PhoneUtils.getSimSerialNumber(this));
+        LogUtils.DOLOG("getSimUsable","" +  PhoneUtils.getSimUsable(this));
+        LogUtils.DOLOG("isMainProcess","" +  PhoneUtils.isMainProcess(this));
     }
 
     private static void GZipTestfun()
