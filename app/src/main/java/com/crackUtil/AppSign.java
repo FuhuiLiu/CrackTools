@@ -15,9 +15,12 @@ import java.security.MessageDigest;
 public class AppSign {
     public static String MD5Code;
 
+    //获取当前APK的签名并对其取MD5值
     public static String getSign(Context context)
     {
+        //获取包名
         String packname = context.getPackageName();
+        //获取签名
         Signature[] arrayOfSignature = getRawSignature(context, packname);
         if ((arrayOfSignature == null) || (arrayOfSignature.length == 0))
         {
@@ -25,56 +28,66 @@ public class AppSign {
         }
         else
         {
+            //取签名拿MD5值
             int i = arrayOfSignature.length;
             for (int j = 0; j < i; j++) {
+                //对签名求MD5
                 MD5Code = getMessageDigest(arrayOfSignature[j].toByteArray());
             }
         }
         return MD5Code;
     }
 
-    private static Signature[] getRawSignature(Context paramContext, String paramString)
+    private static Signature[] getRawSignature(Context context, String packageName)
     {
-        if ((paramString == null) || (paramString.length() == 0)) {
+        if ((packageName == null) || (packageName.length() == 0)) {
             return null;
         }
         PackageInfo localPackageInfo;
-        PackageManager localPackageManager = paramContext.getPackageManager();
+        //获取PackageManager
+        PackageManager localPackageManager = context.getPackageManager();
         try
         {
-            localPackageInfo = localPackageManager.getPackageInfo(paramString, PackageManager.GET_SIGNATURES);
-            if (localPackageInfo == null) {
-                return null;
+            //获取PackageInfo
+            localPackageInfo = localPackageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+            //返回签名数组
+            if (localPackageInfo != null) {
+                return localPackageInfo.signatures;
             }
         }
         catch (PackageManager.NameNotFoundException localNameNotFoundException)
         {
-            return null;
         }
-        return localPackageInfo.signatures;
+        return null;
     }
 
-    public static final String getMessageDigest(byte[] paramArrayOfByte)
+    //取byteAry的MD5字符串
+    public static final String getMessageDigest(byte[] ByteAry)
     {
         char[] arrayOfChar1 = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-        char[] arrayOfChar2 = null;
+        char[] arrayOfChar2;
         try
         {
+            //获取MD5实例
             MessageDigest localMessageDigest = MessageDigest.getInstance("MD5");
-            localMessageDigest.update(paramArrayOfByte);
+            localMessageDigest.update(ByteAry);
+            //对参数byteAry求MD5值
             byte[] arrayOfByte = localMessageDigest.digest();
             int i = arrayOfByte.length;
             arrayOfChar2 = new char[i * 2];
-            int j = 0;
             int k = 0;
-            for (j = 0; j < i; j++)
+            for (int j = 0; j < i; j++)
             {
+                //按byte数组挨个取出
                 int m = arrayOfByte[j];
                 int n = k + 1;
                 //右移指令优先&指令
-                arrayOfChar2[k] = arrayOfChar1[(0xF & m >>> 4)];
+                //取字节高4位，拿对应字符数组的字符
+                arrayOfChar2[k] = arrayOfChar1[(0xF & m >> 4)];
                 k = n + 1;
-                arrayOfChar2[n] = arrayOfChar1[(m & 0xF)];
+                //取字节低4位，拿对应字符数组的字符
+                arrayOfChar2[n] = arrayOfChar1[(0xF & m)];
+                //0xd2 => "d2"
             }
             return new String(arrayOfChar2);
         }
@@ -84,6 +97,7 @@ public class AppSign {
         return null;
     }
 
+    //返回字符串的MD5摘要
     public static final byte[] getRawDigest(byte[] paramArrayOfByte)
     {
         try
