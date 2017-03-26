@@ -15,7 +15,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- meta-data-->
+        <meta-data android:name="WRAP_SDK" android:value="com.sdkwrap.yxjd.Provider"/>
+        <meta-data android:name="FILTER_DISABLE" android:value="true"/>
     </application>
+    <!-- 权限 -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" ></uses-permission>
 </manifest>

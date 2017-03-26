@@ -3,8 +3,14 @@ package com.crackUtil;
 /**
  * Created by AqCxBoM on 2017/1/19.
  */
+import android.os.Environment;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Set;
 
 public class LogUtils {
@@ -45,6 +51,23 @@ public class LogUtils {
     }
 
     //以下为可供外界调用的接口
+    //写日志保存到存储卡 /storage/emulated/0/debug.txt
+    public static void write(String msg) {
+        String exPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+        msg = msg + "\n";
+        File filePath = new File(exPath, "debug.txt");
+        try {
+            msg = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss", Locale.US).format(new Date())
+                    + ": " + msg;
+            FileOutputStream fos = new FileOutputStream(filePath, true);
+            fos.write(msg.getBytes());
+            fos.flush();
+            fos.close();
+        }
+        catch(Exception v0) {
+            v0.printStackTrace();
+        }
+    }
     //关闭日志输出功能
     public static void DisbleLog() { setLogSwitchStatus(ELogSwitch.DISABLE);}
     //设置日志输出等级

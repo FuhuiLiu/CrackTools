@@ -1,33 +1,52 @@
 package aqcxbom.cracktools;
 
+import android.app.Activity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.crackUtil.AppSign;
+import com.crackUtil.FileUtils;
 import com.crackUtil.GZipUtils;
+import com.crackUtil.KernelUtils;
 import com.crackUtil.LogUtils;
-import com.crackUtil.PhoneUtils;
 
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
+    public static Activity mActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mActivity = this;
 
-        LogUtils.DOLOG("isSimExist", "" + PhoneUtils.isSimExist(this));
-        LogUtils.DOLOG("isOnline", "" + PhoneUtils.isOnline(this));
-        LogUtils.DOLOG("getIMEI", PhoneUtils.getIMEI(this));
-        LogUtils.DOLOG("getIMSI", PhoneUtils.getIMSI(this));
-        LogUtils.DOLOG("getNetworkOperator", PhoneUtils.getNetworkOperator(this));
-        LogUtils.DOLOG("getProvidersType","" +  PhoneUtils.getProvidersType(this));
-        LogUtils.DOLOG("getLine1Number","" +  PhoneUtils.getLine1Number(this));
-        LogUtils.DOLOG("getSimCountryIso","" +  PhoneUtils.getSimCountryIso(this));
-        LogUtils.DOLOG("getSimSerialNumber","" +  PhoneUtils.getSimSerialNumber(this));
-        LogUtils.DOLOG("getSimUsable","" +  PhoneUtils.getSimUsable(this));
-        LogUtils.DOLOG("isMainProcess","" +  PhoneUtils.isMainProcess(this));
+        FileUtils.readFile(this);
+        FileUtils.getMetaData(this);
+        //这个有点问题
+        FileUtils.readchannelfile(this, "222");
+        //文件释放+动态加载
+        FileUtils.releaseLib(this);
+        FileUtils.dyLoad(this);
+
+        //LogUtils.write("log now");
+
+        //KernelUtils.isExistService(this, "xxx");
+        //KernelUtils.ergodicProcess(this);
+        //KernelUtils.isExistProcess(this, this.getPackageName());
+
+//        LogUtils.DOLOG("isSimExist", "" + PhoneUtils.isSimExist(this));
+//        LogUtils.DOLOG("isOnline", "" + PhoneUtils.isOnline(this));
+//        LogUtils.DOLOG("getIMEI", PhoneUtils.getIMEI(this));
+//        LogUtils.DOLOG("getIMSI", PhoneUtils.getIMSI(this));
+//        LogUtils.DOLOG("getNetworkOperator", PhoneUtils.getNetworkOperator(this));
+//        LogUtils.DOLOG("getProvidersType","" +  PhoneUtils.getProvidersType(this));
+//        LogUtils.DOLOG("getLine1Number","" +  PhoneUtils.getLine1Number(this));
+//        LogUtils.DOLOG("getSimCountryIso","" +  PhoneUtils.getSimCountryIso(this));
+//        LogUtils.DOLOG("getSimSerialNumber","" +  PhoneUtils.getSimSerialNumber(this));
+//        LogUtils.DOLOG("getSimUsable","" +  PhoneUtils.getSimUsable(this));
+//        LogUtils.DOLOG("isMainProcess","" +  PhoneUtils.isMainProcess(this));
+
+//        LogUtils.DOLOG("getAppVersion","" +  AppInfoUtils.getAppVersion(this));
     }
 
     private static void GZipTestfun()

@@ -12,10 +12,23 @@ import java.security.MessageDigest;
  * Created by AqCxBoM on 2017/3/24.
  */
 
-public class AppSign {
+public class AppInfoUtils {
     public static String MD5Code;
 
-    //获取当前APK的签名并对其取MD5值
+    //获取当前包版本信息 PackageInfo还有很多与APP信息相关字段
+    public static String getAppVersion(Context ct)
+    {
+        PackageManager pm = ct.getPackageManager();
+        String packName = ct.getPackageName();
+        try {
+            PackageInfo pi = pm.getPackageInfo(packName, PackageManager.GET_CONFIGURATIONS);
+            return pi.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+    //获取当前APK的签名并对其取MD5值字符串
     public static String getSign(Context context)
     {
         //获取包名
