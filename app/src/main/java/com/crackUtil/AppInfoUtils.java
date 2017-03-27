@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.util.Log;
 
+import java.lang.reflect.Method;
 import java.security.MessageDigest;
 
 /**

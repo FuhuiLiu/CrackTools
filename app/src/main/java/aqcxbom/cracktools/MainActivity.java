@@ -4,9 +4,10 @@ import android.app.Activity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.crackUtil.FileUtils;
+import android.os.Process;
+import com.crackUtil.AppInfoUtils;
 import com.crackUtil.GZipUtils;
-import com.crackUtil.KernelUtils;
+import com.crackUtil.SystemUtils;
 import com.crackUtil.LogUtils;
 
 import java.io.IOException;
@@ -20,19 +21,24 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mActivity = this;
 
-        FileUtils.readFile(this);
-        FileUtils.getMetaData(this);
-        //这个有点问题
-        FileUtils.readchannelfile(this, "222");
-        //文件释放+动态加载
-        FileUtils.releaseLib(this);
-        FileUtils.dyLoad(this);
+//        FileUtils.readFile(this);
+//        FileUtils.getMetaData(this);
+//        //这个有点问题
+//        FileUtils.readchannelfile(this, "222");
+//        //文件释放+动态加载
+//        FileUtils.releaseLib(this);
+//        FileUtils.dyLoad(this);
 
         //LogUtils.write("log now");
 
-        //KernelUtils.isExistService(this, "xxx");
-        //KernelUtils.ergodicProcess(this);
-        //KernelUtils.isExistProcess(this, this.getPackageName());
+        SystemUtils.isExistService(this, "xxx");
+        SystemUtils.ergodicProcess(this);
+        SystemUtils.isExistProcess(this, this.getPackageName());
+        LogUtils.DOLOG("getCPUABI", SystemUtils.getCPUABI());
+        LogUtils.DOLOG("getAppLabel", SystemUtils.getAppLabel(this));
+        LogUtils.DOLOG("getSystemVersion", "" + SystemUtils.getSystemVersion());
+        LogUtils.DOLOG("getCpuInfo", "" + SystemUtils.getCpuInfo());
+        LogUtils.DOLOG("getPPid", "" + SystemUtils.getPPid(Process.myPid()));
 
 //        LogUtils.DOLOG("isSimExist", "" + PhoneUtils.isSimExist(this));
 //        LogUtils.DOLOG("isOnline", "" + PhoneUtils.isOnline(this));
