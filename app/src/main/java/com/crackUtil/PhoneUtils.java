@@ -4,10 +4,19 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
+import android.os.IBinder;
 import android.os.Process;
+import android.telephony.CellLocation;
 import android.telephony.TelephonyManager;
+import android.telephony.cdma.CdmaCellLocation;
+import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
+
+import java.lang.reflect.Method;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by AqCxBoM on 2017/3/24.
@@ -21,7 +30,96 @@ public class PhoneUtils {
     public static final int TYPE_CTELNET = 3;   //电信
     public static final int TYPE_CUION = 2;     //联通
     public static final int TYPE_NONE = 0;      //未知
+//    public static String wifimac(Context arg6) {
+//        Object v0_1;
+//        try {
+//            WifiManager wm = (WifiManager) arg6.getSystemService(Context.WIFI_SERVICE);
+//            List v5 = wm.getScanResults();
+//            int v4;
+//            for(v4 = 0; v4 < v5.size(); ++v4) {
+//                int v3;
+//                for(v3 = 1; v3 < v5.size(); ++v3) {
+//                    if(((ScanResults)v5.get(v4)).level < v5.get(v3).level) {
+//                        v0_1 = v5.get(v4);
+//                        v5.set(v4, v5.get(v3));
+//                        v5.set(v3, v0_1);
+//                    }
+//                }
+//            }
+//
+//            StringBuffer v3_1 = new StringBuffer();
+//            Iterator v4_1 = v5.iterator();
+//            int v1 = 0;
+//            while(v4_1.hasNext()) {
+//                v0_1 = v4_1.next();
+//                if(v1 > 4) {
+//                    break;
+//                }
+//
+//                ++v1;
+//                v3_1.append(((ScanResult)v0_1).BSSID).append(",");
+//            }
+//
+//            if(v3_1.length() <= 0) {
+//                return "";
+//            }
+//
+//            String v0_2 = v3_1.substring(0, v3_1.length() - 1).replace(":", "");
+//            return v0_2;
+//        }
+//        catch(Exception v0) {
+//        }
+//
+//        return "";
+//    }
+    //获取Wifi MAC地址 <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    public static String getMacAddress(Context arg2) {
+        String mac;
+        try {
+            WifiManager wm = (WifiManager) arg2.getSystemService(Context.WIFI_SERVICE);
+            mac = wm.getConnectionInfo().getMacAddress();
+            if(mac != null && !mac.equals("")) {
+                return mac;
+            }
 
+            mac = "unknown";
+        }
+        catch(Exception v0) {
+            mac = "unknown";
+        }
+
+        return mac;
+    }
+
+    //获取IMEI码，结果与getIMEI一样，适用于双卡机？
+    public static String getSubscriberId(Context context, int nIndex) {
+        String v0 = nIndex == 1 ? "iphonesubinfo2" : "iphonesubinfo";
+        try {
+            Method methodGetService = Class.forName("android.os.ServiceManager").getDeclaredMethod("getService", String
+                    .class);
+            methodGetService.setAccessible(true);
+            Object ser = methodGetService.invoke(null, v0);
+            if(ser == null && nIndex == 1) {
+                ser = methodGetService.invoke(null, "iphonesubinfo1");
+            }
+
+            if(ser == null) {
+                throw new Exception();
+            }
+
+            methodGetService = Class.forName("com.android.internal.telephony.IPhoneSubInfo$Stub").getDeclaredMethod(
+                    "asInterface", IBinder.class);
+            methodGetService.setAccessible(true);
+            ser = methodGetService.invoke(null, ser);
+            v0 = (String)ser.getClass().getMethod("getSubscriberId").invoke(ser);
+        }
+        catch(Exception v0_1) {
+            TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+            v0 = tm.getSubscriberId();
+        }
+
+        return v0;
+    }
     //获取手机卡运营商类型
     public static int getProvidersType(Context context) {
         try {

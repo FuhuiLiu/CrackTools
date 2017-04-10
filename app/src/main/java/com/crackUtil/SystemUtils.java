@@ -10,6 +10,7 @@ import android.util.Log;
 
 import android.os.Process;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -32,6 +33,38 @@ public class SystemUtils {
     private static void LOG(Object obj)
     {
         Log.i(TAG, (String)obj);
+    }
+
+    //检索已安装程序
+    public static void listInstalledPackage(Context context)
+    {
+        //Object v1_2 = context.getSystemService(Context.ACTIVITY_SERVICE);
+        PackageManager pm = context.getPackageManager();
+        //通过PackageManager检查权限
+        //pm.checkPermission()
+        Iterator it = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES).iterator();
+        while(it.hasNext()) {
+            PackageInfo pi = (PackageInfo)it.next();
+            LOG(pi.packageName);
+        }
+    }
+
+    //通过检索指定目录是否存在su文件来判断机器是否有root权限
+    public static boolean isRoot() {
+        boolean bRet = true;
+        String[] strAry = new String[]{"/system/bin/", "/system/xbin/", "/system/sbin/", "/sbin/", "/vendor/bin/"};
+        int i = 0;
+        try {
+            while (i < strAry.length) {
+                if (new File(strAry[i] + "su").exists()) {
+                    bRet = true;
+                    break;
+                }
+                ++i;
+            }
+        } catch (Exception v0_1) {
+        }
+        return bRet;
     }
 
     public static int getPPid(int pid) {

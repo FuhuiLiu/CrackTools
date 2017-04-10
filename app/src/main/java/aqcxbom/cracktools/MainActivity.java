@@ -5,12 +5,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import android.os.Process;
+
+import com.JSONTest.Pet;
+import com.JSONTest.myJson;
 import com.crackUtil.AppInfoUtils;
 import com.crackUtil.GZipUtils;
+import com.crackUtil.PhoneUtils;
 import com.crackUtil.SystemUtils;
 import com.crackUtil.LogUtils;
 
 import java.io.IOException;
+
+import static com.JSONTest.myJson.petToJson;
 
 public class MainActivity extends AppCompatActivity {
     public static Activity mActivity;
@@ -20,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mActivity = this;
+
+        myJson.test();
 
 //        FileUtils.readFile(this);
 //        FileUtils.getMetaData(this);
@@ -31,14 +39,16 @@ public class MainActivity extends AppCompatActivity {
 
         //LogUtils.write("log now");
 
-        SystemUtils.isExistService(this, "xxx");
-        SystemUtils.ergodicProcess(this);
-        SystemUtils.isExistProcess(this, this.getPackageName());
-        LogUtils.DOLOG("getCPUABI", SystemUtils.getCPUABI());
-        LogUtils.DOLOG("getAppLabel", SystemUtils.getAppLabel(this));
-        LogUtils.DOLOG("getSystemVersion", "" + SystemUtils.getSystemVersion());
-        LogUtils.DOLOG("getCpuInfo", "" + SystemUtils.getCpuInfo());
-        LogUtils.DOLOG("getPPid", "" + SystemUtils.getPPid(Process.myPid()));
+//        SystemUtils.isExistService(this, "xxx");
+//        SystemUtils.ergodicProcess(this);
+//        SystemUtils.isExistProcess(this, this.getPackageName());
+//        LogUtils.DOLOG("getCPUABI", SystemUtils.getCPUABI());
+//        LogUtils.DOLOG("getAppLabel", SystemUtils.getAppLabel(this));
+//        LogUtils.DOLOG("getSystemVersion", "" + SystemUtils.getSystemVersion());
+//        LogUtils.DOLOG("getCpuInfo", "" + SystemUtils.getCpuInfo());
+//        LogUtils.DOLOG("getPPid", "" + SystemUtils.getPPid(Process.myPid()));
+//        LogUtils.DOLOG("isRoot", "" + SystemUtils.isRoot());
+//        SystemUtils.listInstalledPackage(this);
 
 //        LogUtils.DOLOG("isSimExist", "" + PhoneUtils.isSimExist(this));
 //        LogUtils.DOLOG("isOnline", "" + PhoneUtils.isOnline(this));
@@ -51,6 +61,9 @@ public class MainActivity extends AppCompatActivity {
 //        LogUtils.DOLOG("getSimSerialNumber","" +  PhoneUtils.getSimSerialNumber(this));
 //        LogUtils.DOLOG("getSimUsable","" +  PhoneUtils.getSimUsable(this));
 //        LogUtils.DOLOG("isMainProcess","" +  PhoneUtils.isMainProcess(this));
+//        LogUtils.DOLOG("getSubscriberId1","" +  PhoneUtils.getSubscriberId(this, 1));
+//        LogUtils.DOLOG("getSubscriberId2","" +  PhoneUtils.getSubscriberId(this, 2));
+//        LogUtils.DOLOG("getMacAddress","" +  PhoneUtils.getMacAddress(this));
 
 //        LogUtils.DOLOG("getAppVersion","" +  AppInfoUtils.getAppVersion(this));
     }
