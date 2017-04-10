@@ -21,12 +21,17 @@ import static com.JSONTest.myJson.petToJson;
 public class MainActivity extends AppCompatActivity {
     public static Activity mActivity;
 
+    public native String getSring();
+    static{
+        System.loadLibrary("native");
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mActivity = this;
 
+        LogUtils.DOLOG(getSring());
         myJson.test();
 
 //        FileUtils.readFile(this);
