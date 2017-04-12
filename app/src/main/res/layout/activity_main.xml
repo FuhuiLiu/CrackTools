@@ -11,8 +11,24 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="aqcxbom.cracktools.MainActivity">
 
-    <TextView
+
+
+    <EditText
+        android:id="@+id/package_edt"
+        android:hint="输入目标包名"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"/>
+        android:layout_toRightOf="@id/package_edt"
+        android:text="确定"/>
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello World!"
+        android:layout_below="@id/package_edt"
+        android:scrollbars="vertical"/>
 </RelativeLayout>

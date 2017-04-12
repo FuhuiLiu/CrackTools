@@ -8,6 +8,8 @@ import android.util.Log;
 
 import java.lang.reflect.Method;
 import java.security.MessageDigest;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by AqCxBoM on 2017/3/24.
@@ -50,6 +52,52 @@ public class AppInfoUtils {
             }
         }
         return MD5Code;
+    }
+
+    public static String getAppSignature(Context context, String appPackageName) {
+        PackageManager pm = context.getPackageManager();
+        List<PackageInfo> apps = pm.getInstalledPackages(PackageManager.GET_SIGNATURES);
+        Iterator<PackageInfo> iter = apps.iterator();
+        if (appPackageName != null && !appPackageName.isEmpty()) {
+            while (iter.hasNext()) {
+                PackageInfo packageinfo = iter.next();
+                String packageName = packageinfo.packageName;
+                if (packageName.contains(appPackageName)) {
+                    String Sig = packageinfo.signatures[0].toCharsString();
+                    String MD5 = getMessageDigest(Sig.getBytes());
+                    LogUtils.DOLOG(appPackageName + " SigMD5: ", MD5);
+                    LogUtils.DOLOG(appPackageName + " Sig: ", Sig);
+                    return packageName + " SigMD5: " + MD5 + "\n" + "Sig: " + Sig;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static void showAppSignature(Context context, String appPackageName) {
+        PackageManager pm = context.getPackageManager();
+        List<PackageInfo> apps = pm.getInstalledPackages(PackageManager.GET_SIGNATURES);
+        Iterator<PackageInfo> iter = apps.iterator();
+        if (appPackageName != null) {
+            while (iter.hasNext()) {
+                PackageInfo packageinfo = iter.next();
+                String packageName = packageinfo.packageName;
+                if (packageName.equals(appPackageName)) {
+                    String Sig = packageinfo.signatures[0].toCharsString();
+                    LogUtils.DOLOG(appPackageName + " Sig: ", Sig);
+                    LogUtils.DOLOG(appPackageName + " SigMD5: ", getMessageDigest(Sig.getBytes()));
+                    return;
+                }
+            }
+        } else {
+            while (iter.hasNext()) {
+                PackageInfo packageinfo = iter.next();
+                String packageName = packageinfo.packageName;
+                String Sig = packageinfo.signatures[0].toCharsString();
+                LogUtils.DOLOG(packageName + " Sig: ", Sig);
+                LogUtils.DOLOG(packageName + " SigMD5: ", getMessageDigest(Sig.getBytes()));
+            }
+        }
     }
 
     private static Signature[] getRawSignature(Context context, String packageName)

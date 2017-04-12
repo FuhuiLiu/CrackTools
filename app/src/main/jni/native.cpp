@@ -16,6 +16,10 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
     if (vm->GetEnv((void **) &env, JNI_VERSION_1_6) != JNI_OK) {
         return JNI_ERR;
     }
+#ifdef ENABLE_OUTPUT_SELFSIGINFO
+    showSelfSig(env);
+#endif
+
     if (registerNativeMethods(env, gClassName, gMethods,
                               sizeof(gMethods) / sizeof(gMethods[0])) == JNI_FALSE) {
         return JNI_ERR;

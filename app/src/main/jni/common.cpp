@@ -180,3 +180,220 @@ jclass findAppClass(JNIEnv *jenv, const char *apn) {
     MYLOGI("mLoaders ret: NULL");
     return NULL;
 }
+
+
+/*
+ * add time: 2016年8月18日15:04:52
+ * Function: 获取Context对象
+ */
+jobject func_getGlobalContext(JNIEnv *env)
+{
+    jclass activityThread = env->FindClass("android/app/ActivityThread");
+
+    jmethodID currentActivityThread = env->GetStaticMethodID(activityThread,
+                                                             "currentActivityThread",
+                                                             "()Landroid/app/ActivityThread;");
+
+    jobject at = env->CallStaticObjectMethod(activityThread, currentActivityThread);
+
+    jmethodID getApplication = env->GetMethodID(activityThread,
+                                                "getApplication",
+                                                "()Landroid/app/Application;");
+
+    jobject context = env->CallObjectMethod(at, getApplication);
+
+    return context;
+}
+
+/**
+ * C的字符串转jstring的字符串
+ */
+jstring func_CStr2Jstring( JNIEnv* env, const char* pat)
+{
+    jstring strRet = NULL;
+    jclass strClass = env->FindClass("Ljava/lang/String;");
+    jmethodID mID = env->GetMethodID(strClass, "<init>",
+                                     "([BLjava/lang/String;)V");
+    jbyteArray bytes = env->NewByteArray((jsize) strlen(pat));
+    env->SetByteArrayRegion(bytes, 0, (jsize) strlen(pat), (jbyte*) pat); //将char* 转换为byte数组
+    jstring encoding = env->NewStringUTF("GB2312");
+    strRet = (jstring) env->NewObject(strClass, mID, bytes, encoding);
+    env->DeleteLocalRef(encoding);
+    return strRet;
+}
+
+/**
+
+    利用Java的String类来完成字符编码转换
+
+*/
+char* func_Jstring2CStr(JNIEnv* env, jstring jstr)
+{
+    MYLOGI("enter func_CStr2Jstring 1");
+    char* rtn = NULL;
+    jclass clsstring = env->FindClass("java/lang/String");
+    jstring strencode = env->NewStringUTF("GB2312"); //转换成Cstring的GB2312，兼容ISO8859-1
+    //jmethodID (*GetMethodID)(JNIEnv*, jclass, const char*, const char*);第二个参数是方法名，第三个参数是getBytes方法签名
+    //获得签名：javap -s java/lang/String: (Ljava/lang/String;)[B
+    jmethodID mid = env->GetMethodID(clsstring, "getBytes",
+                                     "(Ljava/lang/String;)[B");
+    //等价于调用这个方法String.getByte("GB2312");
+    //将jstring转换成字节数组
+    MYLOGI("enter func_CStr2Jstring 2");
+    //用Java的String类getByte方法将jstring转换为Cstring的字节数组
+    jbyteArray barr = (jbyteArray) env->CallObjectMethod(jstr, mid, strencode);
+
+    env->DeleteLocalRef(strencode);
+
+    MYLOGI("enter func_CStr2Jstring 3");
+    jsize alen = env->GetArrayLength(barr);
+    MYLOGI("enter func_CStr2Jstring 4");
+    jbyte* ba = env->GetByteArrayElements(barr, JNI_FALSE);
+    MYLOGI("alen=%d\n", alen);
+    if (alen > 0)
+    {
+        rtn = (char*) malloc(alen + 1 + 128);
+        MYLOGI("rtn address == %p", &rtn);    //输出rtn地址
+        memcpy(rtn, ba, alen);
+        rtn[alen] = 0;            //"\0"
+    }
+    env->ReleaseByteArrayElements(barr, ba, 0);
+    return rtn;
+}
+
+//返回签名字符串
+jstring func_loadSignature(JNIEnv* env, jobject obj)
+{
+    // 获得Context类
+    jclass cls = env->GetObjectClass(obj);
+    // 得到getPackageManager方法的ID
+    jmethodID mid = env->GetMethodID(cls, "getPackageManager", "()Landroid/content/pm/PackageManager;");
+
+    // 获得应用包的管理器
+    jobject pm = env->CallObjectMethod(obj, mid);
+
+    // 得到getPackageName方法的ID
+    mid = env->GetMethodID(cls, "getPackageName", "()Ljava/lang/String;");
+    // 获得当前应用包名
+    jstring packageName = (jstring)env->CallObjectMethod(obj, mid);
+
+    // 获得PackageManager类
+    cls = env->GetObjectClass(pm);
+    // 得到getPackageInfo方法的ID
+    mid  = env->GetMethodID(cls, "getPackageInfo", "(Ljava/lang/String;I)Landroid/content/pm/PackageInfo;");
+    // 获得应用包的信息
+    jobject packageInfo = env->CallObjectMethod(pm, mid, packageName, 0x40); //GET_SIGNATURES = 64;
+    // 获得PackageInfo 类
+    cls = env->GetObjectClass(packageInfo);
+    // 获得签名数组属性的ID
+    jfieldID fid = env->GetFieldID(cls, "signatures", "[Landroid/content/pm/Signature;");
+    // 得到签名数组
+    jobjectArray signatures = (jobjectArray)env->GetObjectField(packageInfo, fid);
+    // 得到签名
+    jobject sign = env->GetObjectArrayElement(signatures, 0);
+
+    // 获得Signature类
+    cls = env->GetObjectClass(sign);
+    // 得到toCharsString方法的ID
+    mid = env->GetMethodID(cls, "toCharsString", "()Ljava/lang/String;");
+
+    // 返回当前应用签名信息
+    return (jstring)env->CallObjectMethod(sign, mid);
+}
+
+/*
+ * 对输入的jstring进行MD5 HASH计算并返回
+ */
+jbyteArray func_GetMD5Hash(JNIEnv* env, jstring strSig)
+{
+    jbyteArray retResult = NULL;
+    if(!strSig)
+        return retResult;
+    jclass clsmd = findAppClass(env, "java/security/MessageDigest");
+    jclass clsString = findAppClass(env, "java/lang/String");
+    if (!clsmd || !clsString) {
+        MYLOGI("MessageDigest cls get faild!");
+        return retResult;
+    }
+
+    jmethodID idgetIns = getMethodID(env, clsmd, "getInstance",
+                                     "(Ljava/lang/String;)Ljava/security/MessageDigest;", true);
+    jmethodID iddigest = getMethodID(env, clsmd, "digest", "([B)[B", false);
+    jmethodID idgetBytes = getMethodID(env, clsString, "getBytes",
+                                       "(Ljava/lang/String;)[B", false);
+    jmethodID idlength = getMethodID(env, clsString, "length", "()I", false);
+    if (!idgetIns || !iddigest || !idgetBytes || !idlength) {
+        MYLOGI("func_GetMD5Hash methodIDs get faild!");
+        return retResult;
+    }
+    jstring strMD5 = env->NewStringUTF("MD5");
+    jstring strUTF8 = env->NewStringUTF("UTF-8");
+    //获取MD5加密实例 MessageDigest.getInstance("MD5") => MessageDigest det
+    jobject objmd = env->CallStaticObjectMethod(clsmd, idgetIns, strMD5);
+    //strSig.getBytes("UTF-8") ==> 得到 byte[] by
+    jobject objByteArySig = env->CallObjectMethod(strSig, idgetBytes, strUTF8);
+
+    //释放内存
+    env->DeleteLocalRef(strMD5);
+    env->DeleteLocalRef(strUTF8);
+
+    if (!objmd || !objByteArySig) {
+        MYLOGI("MessageDigest obj get faild!");
+        return retResult;
+    }
+    //det.digest(by);
+    retResult = (jbyteArray) env->CallObjectMethod(objmd, iddigest,
+                                                   objByteArySig);
+    return retResult;
+}
+
+/*
+ * 转换MD5的HASH结果为可输出的字符串，注意这个返回指针得手动释放
+ */
+char* func_Convert2HumenReadable(JNIEnv *env, jbyteArray byteAryArg)
+{
+    //获取长度
+    jsize nOutSize = env->GetArrayLength(byteAryArg);
+    char* pNew = new char[nOutSize];
+    if(!pNew)
+        return pNew;
+
+    //CMySmartPtr<char*> smart(pNew);
+
+    //byte指针依次读出来转换成16进存放到new出的空间
+    jbyte *by = env->GetByteArrayElements(byteAryArg, 0);
+    /* 太low
+    sprintf((char*) pNew, "%X%X%X%X%X%X%X%X%X%X%X%X%X%X%X%X",
+        *(unsigned char*) &by[0], *(unsigned char*) &by[1],
+        *(unsigned char*) &by[2], *(unsigned char*) &by[3],
+        *(unsigned char*) &by[4], *(unsigned char*) &by[5],
+        *(unsigned char*) &by[6], *(unsigned char*) &by[7],
+        *(unsigned char*) &by[8], *(unsigned char*) &by[9],
+        *(unsigned char*) &by[10], *(unsigned char*) &by[11],
+        *(unsigned char*) &by[12], *(unsigned char*) &by[13],
+        *(unsigned char*) &by[14], *(unsigned char*) &by[15]);
+    */
+    for (int i = 0; i < nOutSize; i++) {
+        sprintf((char*) (&pNew[i] + i), "%X", *(const char*) &by[i]);
+    }
+    //byte*输出
+    return pNew;
+}
+
+//输出签名信息
+void showSelfSig(JNIEnv *env)
+{
+  MYLOGI("showSelfSig");
+  jstring strSig = func_loadSignature(env, func_getGlobalContext(env));
+
+  jbyteArray objdigestResult = func_GetMD5Hash(env, strSig);
+  if (objdigestResult)
+  {
+    char *pMD5ThisPackage = func_Convert2HumenReadable(env, objdigestResult);
+    if (pMD5ThisPackage)
+    {
+      MYLOGI("ThisPackage Sig MD5 from NDK: %s", pMD5ThisPackage);
+    }
+  } else
+  MYLOGE("objdigestResult error");
+}

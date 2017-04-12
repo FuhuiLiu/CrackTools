@@ -5,6 +5,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import android.os.Process;
+import android.text.method.ScrollingMovementMethod;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.JSONTest.Pet;
 import com.JSONTest.myJson;
@@ -20,6 +28,8 @@ import static com.JSONTest.myJson.petToJson;
 
 public class MainActivity extends AppCompatActivity {
     public static Activity mActivity;
+    private EditText mEditTextPackName;
+    private TextView mTextViewSigInfo;
 
     public native String getSring();
     static{
@@ -31,8 +41,27 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mActivity = this;
 
-        LogUtils.DOLOG(getSring());
-        myJson.test();
+        Button btn = (Button)findViewById(R.id.btn);
+
+        mTextViewSigInfo = (TextView) findViewById(R.id.text);
+        mTextViewSigInfo.setMovementMethod(ScrollingMovementMethod.getInstance());
+        mEditTextPackName = (EditText)findViewById(R.id.package_edt);
+        btn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String packName = mEditTextPackName.getText().toString();
+                String sigInfo = AppInfoUtils.getAppSignature(mActivity, packName);
+                if(sigInfo == null)
+                {
+                    sigInfo = "没有这个包名";
+                    Toast.makeText(mActivity, sigInfo, Toast.LENGTH_SHORT).show();
+                }
+                mTextViewSigInfo.setText(sigInfo);
+            }
+        });
+
+//        LogUtils.DOLOG(getSring());
+//        myJson.test();
 
 //        FileUtils.readFile(this);
 //        FileUtils.getMetaData(this);
