@@ -23,8 +23,7 @@ import com.crackUtil.SystemUtils;
 import com.crackUtil.LogUtils;
 
 import java.io.IOException;
-
-import static com.JSONTest.myJson.petToJson;
+import java.security.Signature;
 
 public class MainActivity extends AppCompatActivity {
     public static Activity mActivity;
@@ -42,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
         mActivity = this;
 
         Button btn = (Button)findViewById(R.id.btn);
-
         mTextViewSigInfo = (TextView) findViewById(R.id.text);
         mTextViewSigInfo.setMovementMethod(ScrollingMovementMethod.getInstance());
         mEditTextPackName = (EditText)findViewById(R.id.package_edt);

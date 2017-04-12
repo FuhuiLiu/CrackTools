@@ -147,7 +147,7 @@ public class SystemUtils {
         }
         return cpuabi;
     }
-    //查找指定服务名
+    //查找指定服务名 遍历服务
     public static boolean isExistService(Context context, String name) {
         boolean bRet = false;
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);

@@ -54,6 +54,12 @@ public class AppInfoUtils {
         return MD5Code;
     }
 
+    /**
+     * 获取包含参数指定字符串的包对应的签名及其MD5字符串
+     * @param context
+     * @param appPackageName
+     * @return 签名及其MD5字符串
+     */
     public static String getAppSignature(Context context, String appPackageName) {
         PackageManager pm = context.getPackageManager();
         List<PackageInfo> apps = pm.getInstalledPackages(PackageManager.GET_SIGNATURES);
@@ -74,11 +80,16 @@ public class AppInfoUtils {
         return null;
     }
 
+    /**
+     * 获取指定包名的签名及md5串
+     * @param context
+     * @param appPackageName 目标包名，参数为null则遍历输出所有包的相关信息
+     */
     public static void showAppSignature(Context context, String appPackageName) {
         PackageManager pm = context.getPackageManager();
         List<PackageInfo> apps = pm.getInstalledPackages(PackageManager.GET_SIGNATURES);
         Iterator<PackageInfo> iter = apps.iterator();
-        if (appPackageName != null) {
+        if (appPackageName != null && !appPackageName.isEmpty()) {
             while (iter.hasNext()) {
                 PackageInfo packageinfo = iter.next();
                 String packageName = packageinfo.packageName;
@@ -100,7 +111,13 @@ public class AppInfoUtils {
         }
     }
 
-    private static Signature[] getRawSignature(Context context, String packageName)
+    /**
+     * 获取对应包名的签名数据
+     * @param context
+     * @param packageName
+     * @return 签名数据
+     */
+    public static Signature[] getRawSignature(Context context, String packageName)
     {
         if ((packageName == null) || (packageName.length() == 0)) {
             return null;
@@ -123,7 +140,7 @@ public class AppInfoUtils {
         return null;
     }
 
-    //取byteAry的MD5字符串
+    //取byteAry的MD5字符串(可显示字符串)
     public static final String getMessageDigest(byte[] ByteAry)
     {
         char[] arrayOfChar1 = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
