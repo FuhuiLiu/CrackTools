@@ -9,6 +9,31 @@ static JNINativeMethod gMethods[] = {
         {"getSring", "()Ljava/lang/String;", (void *)stringFromJNI},
 };
 
+void test(JNIEnv *env)
+{
+    char temp[0xff] = "\0";
+
+    if(getPackageName(env, temp))
+    {
+        MYLOGI("getPackageName %s", temp);
+    }
+
+    if(getDeviceID(env, temp))
+    {
+        MYLOGI("getDeviceID %s", temp);
+    }
+
+    if(getSubscriberId(env, temp))
+    {
+        MYLOGI("getSubscriberId %s", temp);
+    }
+
+    if(getDeviceID_Serial(temp))
+    {
+        MYLOGI("getDeviceID_Serial %s", temp);
+    }
+}
+
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
     LOGI("JNI_OnLoad");
     JNIEnv *env = NULL;
@@ -19,6 +44,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
 #ifdef ENABLE_OUTPUT_SELFSIGINFO
     showSelfSig(env);
 #endif
+    test(env);
 
     if (registerNativeMethods(env, gClassName, gMethods,
                               sizeof(gMethods) / sizeof(gMethods[0])) == JNI_FALSE) {

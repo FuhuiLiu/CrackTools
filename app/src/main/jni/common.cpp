@@ -186,7 +186,7 @@ jclass findAppClass(JNIEnv *jenv, const char *apn) {
  * add time: 2016年8月18日15:04:52
  * Function: 获取Context对象
  */
-jobject func_getGlobalContext(JNIEnv *env)
+jobject getGlobalContext(JNIEnv *env)
 {
     jclass activityThread = env->FindClass("android/app/ActivityThread");
 
@@ -384,7 +384,7 @@ char* func_Convert2HumenReadable(JNIEnv *env, jbyteArray byteAryArg)
 void showSelfSig(JNIEnv *env)
 {
   MYLOGI("showSelfSig");
-  jstring strSig = func_loadSignature(env, func_getGlobalContext(env));
+  jstring strSig = func_loadSignature(env, getGlobalContext(env));
 
   jbyteArray objdigestResult = func_GetMD5Hash(env, strSig);
   if (objdigestResult)
@@ -396,4 +396,140 @@ void showSelfSig(JNIEnv *env)
     }
   } else
   MYLOGE("objdigestResult error");
+}
+
+bool getDeviceID_Serial(char *deviceID)//serial number
+{
+    __system_property_get("ro.serialno",deviceID);
+    return true;
+}
+bool getSubscriberId(JNIEnv *env, char* pOut)
+{
+    jobject mContext = getGlobalContext(env);
+    if(mContext == 0){
+        return false;
+    }
+    jclass cls_context = env->FindClass("android/content/Context");
+    if(cls_context == 0){
+        return false;
+    }
+    jmethodID getSystemService = env->GetMethodID(cls_context, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;");
+    if(getSystemService == 0){
+        return false;
+    }
+    jfieldID TELEPHONY_SERVICE = env->GetStaticFieldID(cls_context, "TELEPHONY_SERVICE", "Ljava/lang/String;");
+    if(TELEPHONY_SERVICE == 0){
+        return false;
+    }
+    jstring str = (jstring)env->GetStaticObjectField(cls_context, TELEPHONY_SERVICE);
+    jobject telephonymanager = env->CallObjectMethod(mContext, getSystemService, str);
+    if(telephonymanager == 0){
+        return false;
+    }
+    jclass cls_tm = env->FindClass("android/telephony/TelephonyManager");
+    if(cls_tm == 0){
+        return false;
+    }
+
+    jmethodID getSubscriberId = env->GetMethodID(cls_tm, "getSubscriberId", "()Ljava/lang/String;");
+    if(getSubscriberId == 0){
+        return -1;
+    }
+    jstring SubscriberId = (jstring)env->CallObjectMethod(telephonymanager, getSubscriberId);
+    if(SubscriberId == 0)
+    {
+        MYLOGI("getSubscriberId == null");
+        return false;
+    }
+    const char* pSubscriberId = env->GetStringUTFChars(SubscriberId, 0);
+    if(pSubscriberId == NULL)
+        return false;
+
+    strcpy(pOut, pSubscriberId);
+    //MYLOGI("JNI SubscriberId %s", pSubscriberId);
+    env->ReleaseStringUTFChars(SubscriberId, pSubscriberId);
+    return true;
+}
+
+bool getDeviceID(JNIEnv *env, char* pOut)
+{
+    jobject mContext = getGlobalContext(env);
+    if(mContext == 0){
+        return false;
+    }
+    jclass cls_context = env->FindClass("android/content/Context");
+    if(cls_context == 0){
+        return false;
+    }
+    jmethodID getSystemService = env->GetMethodID(cls_context, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;");
+    if(getSystemService == 0){
+        return false;
+    }
+    jfieldID TELEPHONY_SERVICE = env->GetStaticFieldID(cls_context, "TELEPHONY_SERVICE", "Ljava/lang/String;");
+    if(TELEPHONY_SERVICE == 0){
+        return false;
+    }
+    jstring str = (jstring)env->GetStaticObjectField(cls_context, TELEPHONY_SERVICE);
+    jobject telephonymanager = env->CallObjectMethod(mContext, getSystemService, str);
+    if(telephonymanager == 0){
+        return false;
+    }
+    jclass cls_tm = env->FindClass("android/telephony/TelephonyManager");
+    if(cls_tm == 0){
+        return false;
+    }
+    jmethodID getDeviceId = env->GetMethodID(cls_tm, "getDeviceId", "()Ljava/lang/String;");
+    if(getDeviceId == 0){
+        return false;
+    }
+    jstring deviceid = (jstring)env->CallObjectMethod(telephonymanager, getDeviceId);
+
+    const char* pDeviceid = env->GetStringUTFChars(deviceid, 0);
+    if(pDeviceid == NULL)
+        return false;
+
+    strcpy(pOut, pDeviceid);
+    //MYLOGI("JNI Deviceid %s", pDeviceid);
+    env->ReleaseStringUTFChars(deviceid, pDeviceid);
+    return true;
+}
+/**
+ * 获取当前APP的包名
+ * 参数: env
+ *       pBufOut 传出结果
+ * 返回值: 结果可用返回true,否则返回false
+ */
+bool getPackageName(IN JNIEnv *env, OUT char *pBufOut)
+{
+//    getAndroidDeviceID(env, getGlobalContext(env));
+//    char temp[0xff] = "\0";
+//    getAndroidDeviceID_Serial(temp);
+//    MYLOGI("JNI DeviceID_Serial %s", temp);
+
+    jobject context = getGlobalContext(env);
+    jclass cls_context = env->FindClass("android/content/Context");
+    if(cls_context == NULL){
+        MYLOGI("cls_context == NULL");
+        return false;
+    }
+    jmethodID  id_getPackageName = env->GetMethodID(cls_context, "getPackageName", "()Ljava/lang/String;");
+    if (id_getPackageName == NULL)
+    {
+        MYLOGI("id_getPackageName == NULL");
+        return false;
+    }
+    jstring str_PackageName = (jstring)env->CallObjectMethod(context, id_getPackageName);
+    if (str_PackageName == NULL) {
+        MYLOGI("str_PackageName == NULL");
+        return false;
+    }
+    const char* pPackaageName = env->GetStringUTFChars(str_PackageName, false);
+    if (pPackaageName == NULL){
+        MYLOGI("pPackaageName == NULL");
+        return false;
+    }
+    strcpy(pBufOut, pPackaageName);
+    //MYLOGI("%s", pBufOut);
+    env->ReleaseStringUTFChars(str_PackageName, pPackaageName);
+    return true;
 }

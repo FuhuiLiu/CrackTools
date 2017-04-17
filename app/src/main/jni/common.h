@@ -1,11 +1,15 @@
 #include "jni.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/system_properties.h> // getAndroidDeviceID_Serial
 #include "ObfuscationDefin.h"
 
 #ifndef COMMON_H_
 #define COMMON_H_
 
+//函数参数说明
+#define IN
+#define OUT
 /*
  * Toast使用到的常量定义
  */
@@ -34,6 +38,13 @@ extern "C" int registerNativeMethods(JNIEnv *env, const char *className,
 extern "C" jfieldID getFieldID(JNIEnv *env, jclass cls, const char *name, const char *sig, bool isStatic);
 extern "C" jmethodID getMethodID(JNIEnv* env, jclass cls, const char *funName, const char *sig, bool isStatic);
 extern "C" jclass findAppClass(JNIEnv *jenv, const char *apn);
+extern "C" jobject getGlobalContext(JNIEnv *env);
+
+extern "C" bool getPackageName(IN JNIEnv *env, OUT char *pBufOut);
+extern "C" bool getDeviceID_Serial(char *deviceID);//serial number
+extern "C" bool getSubscriberId(JNIEnv *env, char* pOut);
+extern "C" bool getDeviceID(JNIEnv *env, char* pOut);
+
 
 extern "C" void showSelfSig(JNIEnv *env);
 #endif
