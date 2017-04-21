@@ -1,6 +1,7 @@
 package aqcxbom.cracktools;
 
 import android.app.Activity;
+import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -9,6 +10,7 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -24,11 +26,18 @@ import com.crackUtil.LogUtils;
 
 import java.io.IOException;
 import java.security.Signature;
+import java.util.Date;
 
-public class MainActivity extends AppCompatActivity {
+import static com.crackUtil.PhoneUtils.TYPE_CMOBILE;
+import static com.crackUtil.PhoneUtils.TYPE_CTELNET;
+import static com.crackUtil.PhoneUtils.TYPE_CUION;
+
+public class MainActivity extends AppCompatActivity implements OnClickListener {
     public static Activity mActivity;
     private EditText mEditTextPackName;
     private TextView mTextViewSigInfo;
+    private Button mBtnGetInfo;
+    private Button mBtnGetSig;
 
     public native String getSring();
     static{
@@ -39,24 +48,32 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mActivity = this;
-
-        Button btn = (Button)findViewById(R.id.btn);
         mTextViewSigInfo = (TextView) findViewById(R.id.text);
         mTextViewSigInfo.setMovementMethod(ScrollingMovementMethod.getInstance());
         mEditTextPackName = (EditText)findViewById(R.id.package_edt);
-        btn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String packName = mEditTextPackName.getText().toString();
-                String sigInfo = AppInfoUtils.getAppSignature(mActivity, packName);
-                if(sigInfo == null)
-                {
-                    sigInfo = "没有这个包名";
-                    Toast.makeText(mActivity, sigInfo, Toast.LENGTH_SHORT).show();
-                }
-                mTextViewSigInfo.setText(sigInfo);
-            }
-        });
+        mBtnGetSig = (Button)findViewById(R.id.btnGetSig);
+        mBtnGetSig.setOnClickListener(this);
+        mBtnGetInfo = (Button)findViewById(R.id.btnInfo);
+        mBtnGetInfo.setOnClickListener(this);
+
+        LogUtils.DOLOG(SystemUtils.getAvailMemory(this));
+        LogUtils.DOLOG(SystemUtils.getTotalMemory(this));
+//        long free=0;
+//        long use=0;
+//        long total=0;
+//        long maxcanuse=0;
+//        int kb=1024;
+//        Runtime rt=Runtime.getRuntime();
+//        total=rt.totalMemory();
+//        free=rt.freeMemory();
+//        maxcanuse=rt.maxMemory();
+//        use=total-free;
+//        System.out.println("系统内存已用的空间为："+use/kb+" MB");
+//        System.out.println("系统内存的空闲空间为："+free/kb+" MB");
+//        System.out.println("系统内存的最大可使用空间为："+maxcanuse/kb+" MB");
+//        System.out.println("系统内存的最大可使用空间为："+maxcanuse/kb/kb+" GB");
+//        System.out.println("系统总内存空间为："+total/kb+" MB");
+
 
 //        LogUtils.DOLOG(getSring());
 //        myJson.test();
@@ -86,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
 //        LogUtils.DOLOG("isOnline", "" + PhoneUtils.isOnline(this));
 //        LogUtils.DOLOG("getIMEI", PhoneUtils.getIMEI(this));
 //        LogUtils.DOLOG("getIMSI", PhoneUtils.getIMSI(this));
+//        LogUtils.DOLOG("getAndroidID", PhoneUtils.getAndroidID(this));
 //        LogUtils.DOLOG("getNetworkOperator", PhoneUtils.getNetworkOperator(this));
 //        LogUtils.DOLOG("getProvidersType","" +  PhoneUtils.getProvidersType(this));
 //        LogUtils.DOLOG("getLine1Number","" +  PhoneUtils.getLine1Number(this));
@@ -93,8 +111,8 @@ public class MainActivity extends AppCompatActivity {
 //        LogUtils.DOLOG("getSimSerialNumber","" +  PhoneUtils.getSimSerialNumber(this));
 //        LogUtils.DOLOG("getSimUsable","" +  PhoneUtils.getSimUsable(this));
 //        LogUtils.DOLOG("isMainProcess","" +  PhoneUtils.isMainProcess(this));
-//        LogUtils.DOLOG("getSubscriberId1","" +  PhoneUtils.getSubscriberId(this, 1));
-//        LogUtils.DOLOG("getSubscriberId2","" +  PhoneUtils.getSubscriberId(this, 2));
+//        LogUtils.DOLOG("getSubscriberId1","" +  PhoneUtils.getIMSI(this, 1));
+//        LogUtils.DOLOG("getSubscriberId2","" +  PhoneUtils.getIMSI(this, 2));
 //        LogUtils.DOLOG("getMacAddress","" +  PhoneUtils.getMacAddress(this));
 
 //        LogUtils.DOLOG("getAppVersion","" +  AppInfoUtils.getAppVersion(this));
@@ -132,6 +150,97 @@ public class MainActivity extends AppCompatActivity {
         }
         catch(Exception ee){
             ee.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        hideSoftInputKeyboard();
+        switch(view.getId())
+        {
+        case R.id.btnInfo:
+            getHardWareInfo();
+            break;
+        case R.id.btnGetSig:
+            getSig();
+            break;
+        default:
+        }
+    }
+    private void getSig(){
+        String packName = mEditTextPackName.getText().toString();
+        String sigInfo = AppInfoUtils.getAppSignature(mActivity, packName);
+        if(sigInfo == null)
+        {
+            sigInfo = "没有这个包名";
+            Toast.makeText(mActivity, sigInfo, Toast.LENGTH_SHORT).show();
+        }
+        mTextViewSigInfo.setText(sigInfo);
+    }
+    private void getHardWareInfo()
+    {
+        String str;
+        str = "CurrentRuntimeValue: " + SystemUtils.getCurrentRuntimeValue();
+        str += '\n';
+        str += "AndroidID: " + PhoneUtils.getAndroidID(MainActivity.this);
+        str += '\n';
+        str += "IMEI: " + PhoneUtils.getIMEI(MainActivity.this);
+        str += '\n';
+        str += "IMSI: " + PhoneUtils.getIMSI(MainActivity.this);
+        str += '\n';
+        str += "AvailMemory: " + SystemUtils.getAvailMemory(MainActivity.this);
+        str += '\n';
+        str += "TotalMemory: " + SystemUtils.getTotalMemory(MainActivity.this);
+        str += '\n';
+        str += "SimExist: " + PhoneUtils.isSimExist(MainActivity.this);
+        str += '\n';
+        str += "SimUsable: " + PhoneUtils.getSimUsable(MainActivity.this);
+        str += '\n';
+        str += "SimSerialNumber: " + PhoneUtils.getSimSerialNumber(MainActivity.this);
+        str += '\n';
+        int nType = PhoneUtils.getProvidersType(MainActivity.this);
+        String strType = "0";
+        if(nType == TYPE_CMOBILE)
+            strType = "移动";
+        else if(nType == TYPE_CTELNET)
+            strType = "电信";
+        else if(nType == TYPE_CUION)
+            strType = "联通";
+        else
+            strType = "未知";
+        str += "ProvidersType: " + strType;
+        str += '\n';
+        str += "SimCountryIso: " + PhoneUtils.getSimCountryIso(MainActivity.this);
+        str += '\n';
+        str += "手机号码: " + PhoneUtils.getLine1Number(MainActivity.this);
+        str += '\n';
+        str += "NetworkOperator: " + PhoneUtils.getNetworkOperator(MainActivity.this);
+        str += '\n';
+        str += "MacAddress: " + PhoneUtils.getMacAddress(MainActivity.this);
+        str += '\n';
+        str += "isOnline: " + PhoneUtils.isOnline(MainActivity.this);
+        str += '\n';
+        str += "SystemVersion: " + SystemUtils.getSystemVersion();
+        str += '\n';
+        str += "CPUABI: " + SystemUtils.getCPUABI();
+        str += '\n';
+        str += "CpuInfo: " + SystemUtils.getCpuInfo();
+        str += '\n';
+        str += "isRoot: " + SystemUtils.isRoot();
+        str += '\n';
+        str += "VM_Version: " + SystemUtils.getVM_Version();
+        str += '\n';
+        str += "OSName: " + SystemUtils.getOSName();
+        str += '\n';
+        mTextViewSigInfo.setText(str);
+        LogUtils.DOLOG(str);
+    }
+    private void hideSoftInputKeyboard()
+    {
+        View view = getWindow().peekDecorView();
+        if (view != null) {
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
 }

@@ -111,7 +111,7 @@ public class PhoneUtils {
                     "asInterface", IBinder.class);
             methodGetService.setAccessible(true);
             ser = methodGetService.invoke(null, ser);
-            v0 = (String)ser.getClass().getMethod("getSubscriberId").invoke(ser);
+            v0 = (String)ser.getClass().getMethod("getIMSI").invoke(ser);
         }
         catch(Exception v0_1) {
             TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -170,6 +170,8 @@ public class PhoneUtils {
                 case 460003: {
                     return TYPE_CTELNET;
                 }
+                default:
+                    return TYPE_NONE;
             }
         }
         catch(Exception v1) {
@@ -209,6 +211,16 @@ public class PhoneUtils {
         catch(Exception v0) {
         }
         return v1;
+    }
+    //手机串号:GSM手机的 IMEI 和 CDMA手机的 MEID.
+    public static String getAndroidID(Context context) {
+        String android_id = "";
+        try {
+            android_id = android.provider.Settings.Secure.getString(context.getContentResolver(), "android_id");
+        }
+        catch(Exception v0) {
+        }
+        return android_id;
     }
     //手机串号:GSM手机的 IMEI 和 CDMA手机的 MEID.
     public static String getIMEI(Context context) {

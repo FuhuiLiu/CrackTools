@@ -12,26 +12,6 @@ static JNINativeMethod gMethods[] = {
 void test(JNIEnv *env)
 {
     char temp[0xff] = "\0";
-
-    if(getPackageName(env, temp))
-    {
-        MYLOGI("getPackageName %s", temp);
-    }
-
-    if(getDeviceID(env, temp))
-    {
-        MYLOGI("getDeviceID %s", temp);
-    }
-
-    if(getSubscriberId(env, temp))
-    {
-        MYLOGI("getSubscriberId %s", temp);
-    }
-
-    if(getDeviceID_Serial(temp))
-    {
-        MYLOGI("getDeviceID_Serial %s", temp);
-    }
 }
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {

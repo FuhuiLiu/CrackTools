@@ -11,9 +11,11 @@ cmake_minimum_required(VERSION 3.4.1)
 # automatically packages shared libraries with your APK.
 
 #生成共享库名、类型及源文件，注意这里的源文件不要加后缀，它会自己拼
-add_library( native SHARED src/main/jni/native src/main/jni/Art src/main/jni/common)
+add_library( native SHARED src/main/jni/native src/main/jni/common/Art src/main/jni/common/common
+    src/main/jni/common/md5)
 
 include_directories(src/main/jni/)
+include_directories(src/main/jni/common/)
 
 #日志相关
 find_library( log-lib log )

@@ -180,8 +180,6 @@ jclass findAppClass(JNIEnv *jenv, const char *apn) {
     MYLOGI("mLoaders ret: NULL");
     return NULL;
 }
-
-
 /*
  * add time: 2016年8月18日15:04:52
  * Function: 获取Context对象
@@ -262,7 +260,7 @@ char* func_Jstring2CStr(JNIEnv* env, jstring jstr)
 }
 
 //返回签名字符串
-jstring func_loadSignature(JNIEnv* env, jobject obj)
+jstring getApkSignature(JNIEnv *env, jobject obj)
 {
     // 获得Context类
     jclass cls = env->GetObjectClass(obj);
@@ -304,7 +302,7 @@ jstring func_loadSignature(JNIEnv* env, jobject obj)
 /*
  * 对输入的jstring进行MD5 HASH计算并返回
  */
-jbyteArray func_GetMD5Hash(JNIEnv* env, jstring strSig)
+jbyteArray GetMD5Hash(JNIEnv *env, jstring strSig)
 {
     jbyteArray retResult = NULL;
     if(!strSig)
@@ -323,7 +321,7 @@ jbyteArray func_GetMD5Hash(JNIEnv* env, jstring strSig)
                                        "(Ljava/lang/String;)[B", false);
     jmethodID idlength = getMethodID(env, clsString, "length", "()I", false);
     if (!idgetIns || !iddigest || !idgetBytes || !idlength) {
-        MYLOGI("func_GetMD5Hash methodIDs get faild!");
+        MYLOGI("GetMD5Hash methodIDs get faild!");
         return retResult;
     }
     jstring strMD5 = env->NewStringUTF("MD5");
@@ -350,7 +348,7 @@ jbyteArray func_GetMD5Hash(JNIEnv* env, jstring strSig)
 /*
  * 转换MD5的HASH结果为可输出的字符串，注意这个返回指针得手动释放
  */
-char* func_Convert2HumenReadable(JNIEnv *env, jbyteArray byteAryArg)
+char* Convert2HumenReadable(JNIEnv *env, jbyteArray byteAryArg)
 {
     //获取长度
     jsize nOutSize = env->GetArrayLength(byteAryArg);
@@ -384,26 +382,56 @@ char* func_Convert2HumenReadable(JNIEnv *env, jbyteArray byteAryArg)
 void showSelfSig(JNIEnv *env)
 {
   MYLOGI("showSelfSig");
-  jstring strSig = func_loadSignature(env, getGlobalContext(env));
+  jstring strSig = getApkSignature(env, getGlobalContext(env));
 
-  jbyteArray objdigestResult = func_GetMD5Hash(env, strSig);
+  jbyteArray objdigestResult = GetMD5Hash(env, strSig);
   if (objdigestResult)
   {
-    char *pMD5ThisPackage = func_Convert2HumenReadable(env, objdigestResult);
+    char *pMD5ThisPackage = Convert2HumenReadable(env, objdigestResult);
     if (pMD5ThisPackage)
     {
       MYLOGI("ThisPackage Sig MD5 from NDK: %s", pMD5ThisPackage);
+      delete[] pMD5ThisPackage;
     }
   } else
   MYLOGE("objdigestResult error");
 }
-
 bool getDeviceID_Serial(char *deviceID)//serial number
 {
     __system_property_get("ro.serialno",deviceID);
     return true;
 }
-bool getSubscriberId(JNIEnv *env, char* pOut)
+/**
+ * 获取签名信息
+ * 参数: env
+ *       pBufOut 传出结果
+ * 返回值: 结果可用返回true,否则返回false
+ */
+bool getSelfMD5Sig(IN JNIEnv *env, OUT char *pBufOut)
+{
+    MYLOGI("showSelfSig");
+    jstring strSig = getApkSignature(env, getGlobalContext(env));
+
+    jbyteArray objdigestResult = GetMD5Hash(env, strSig);
+    if (objdigestResult)
+    {
+        char *pMD5ThisPackage = Convert2HumenReadable(env, objdigestResult);
+        if (pMD5ThisPackage)
+        {
+            MYLOGI("getSelfMD5Sig ThisPackage Sig MD5 from NDK: %s", pMD5ThisPackage);
+            strcpy(pBufOut, pMD5ThisPackage);
+            delete[] pMD5ThisPackage;
+        }
+    } else
+    MYLOGE("objdigestResult error");
+}
+/**
+ * 获取IMSI（SubscriberId）
+ * 参数: env
+ *       pBufOut 传出结果
+ * 返回值: 结果可用返回true,否则返回false
+ */
+bool getIMSI(JNIEnv *env, char *pOut)
 {
     jobject mContext = getGlobalContext(env);
     if(mContext == 0){
@@ -438,7 +466,7 @@ bool getSubscriberId(JNIEnv *env, char* pOut)
     jstring SubscriberId = (jstring)env->CallObjectMethod(telephonymanager, getSubscriberId);
     if(SubscriberId == 0)
     {
-        MYLOGI("getSubscriberId == null");
+        MYLOGI("getIMSI == null");
         return false;
     }
     const char* pSubscriberId = env->GetStringUTFChars(SubscriberId, 0);
@@ -450,8 +478,13 @@ bool getSubscriberId(JNIEnv *env, char* pOut)
     env->ReleaseStringUTFChars(SubscriberId, pSubscriberId);
     return true;
 }
-
-bool getDeviceID(JNIEnv *env, char* pOut)
+/**
+ * 获取IMEI（DeviceID）
+ * 参数: env
+ *       pBufOut 传出结果
+ * 返回值: 结果可用返回true,否则返回false
+ */
+bool getIMEI(JNIEnv *env, char *pOut)
 {
     jobject mContext = getGlobalContext(env);
     if(mContext == 0){
@@ -494,6 +527,109 @@ bool getDeviceID(JNIEnv *env, char* pOut)
     return true;
 }
 /**
+ * 获取Sim卡序列号
+ * 参数: env
+ *       pBufOut 传出结果
+ * 返回值: 结果可用返回true,否则返回false
+ */
+bool getSimSerialNumber(JNIEnv *env, char *pOut)
+{
+    jobject mContext = getGlobalContext(env);
+    if(mContext == 0){
+        return false;
+    }
+    jclass cls_context = env->FindClass("android/content/Context");
+    if(cls_context == 0){
+        return false;
+    }
+    jmethodID getSystemService = env->GetMethodID(cls_context, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;");
+    if(getSystemService == 0){
+        return false;
+    }
+    jfieldID TELEPHONY_SERVICE = env->GetStaticFieldID(cls_context, "TELEPHONY_SERVICE", "Ljava/lang/String;");
+    if(TELEPHONY_SERVICE == 0){
+        return false;
+    }
+    jstring str = (jstring)env->GetStaticObjectField(cls_context, TELEPHONY_SERVICE);
+    jobject telephonymanager = env->CallObjectMethod(mContext, getSystemService, str);
+    if(telephonymanager == 0){
+        return false;
+    }
+    jclass cls_tm = env->FindClass("android/telephony/TelephonyManager");
+    if(cls_tm == 0){
+        return false;
+    }
+    jmethodID getDeviceId = env->GetMethodID(cls_tm, "getSimSerialNumber", "()Ljava/lang/String;");
+    if(getDeviceId == 0){
+        return false;
+    }
+    jstring deviceid = (jstring)env->CallObjectMethod(telephonymanager, getDeviceId);
+
+    const char* pDeviceid = env->GetStringUTFChars(deviceid, 0);
+    if(pDeviceid == NULL)
+        return false;
+
+    strcpy(pOut, pDeviceid);
+    //MYLOGI("JNI SimSerialNumber %s", pDeviceid);
+    env->ReleaseStringUTFChars(deviceid, pDeviceid);
+    return true;
+}
+/**
+ * 获取AndroidID
+ * 参数: env
+ *       pBufOut 传出结果
+ * 返回值: 结果可用返回true,否则返回false
+ */
+bool getAndroidID(IN JNIEnv *env, OUT char *pBufOut)
+{
+    jobject mContext = getGlobalContext(env);
+    if(mContext == 0){
+        return false;
+    }
+    jclass cls_context = env->FindClass("android/content/Context");
+    if(cls_context == 0){
+        return false;
+    }
+    jmethodID getContentResolver = env->GetMethodID(cls_context, "getContentResolver", "()Landroid/content/ContentResolver;");
+    if(getContentResolver == 0){
+        return false;
+    }
+    jobject objContentResolver =  env->CallObjectMethod(mContext, getContentResolver);
+    if(objContentResolver == 0){
+        return false;
+    }
+
+    jclass clsSecure = env->FindClass("android/provider/Settings$Secure");
+    if(clsSecure == NULL)
+    {
+        return false;
+    }
+    jmethodID id_getString = env->GetStaticMethodID(clsSecure, "getString", "(Landroid/content/ContentResolver;Ljava/lang/String;)Ljava/lang/String;");
+    if(id_getString == NULL)
+    {
+        return false;
+    }
+    jstring sss = env->NewStringUTF("android_id");
+    if (sss == NULL) {
+        env->DeleteLocalRef(sss);
+        return false;
+    }
+    jstring ooo = (jstring)env->CallStaticObjectMethod(clsSecure, id_getString, objContentResolver, sss);
+    if (ooo == NULL) {
+        return false;
+    }
+    const char *pResult = env->GetStringUTFChars(ooo, 0);
+    if (pResult == NULL) {
+        return false;
+    }
+    //MYLOGI("android_id %s", pResult);
+    strcpy(pBufOut, pResult);
+
+    env->DeleteLocalRef(sss);
+    env->ReleaseStringUTFChars(ooo, pResult);
+    return true;
+}
+/**
  * 获取当前APP的包名
  * 参数: env
  *       pBufOut 传出结果
@@ -501,11 +637,6 @@ bool getDeviceID(JNIEnv *env, char* pOut)
  */
 bool getPackageName(IN JNIEnv *env, OUT char *pBufOut)
 {
-//    getAndroidDeviceID(env, getGlobalContext(env));
-//    char temp[0xff] = "\0";
-//    getAndroidDeviceID_Serial(temp);
-//    MYLOGI("JNI DeviceID_Serial %s", temp);
-
     jobject context = getGlobalContext(env);
     jclass cls_context = env->FindClass("android/content/Context");
     if(cls_context == NULL){
@@ -532,4 +663,161 @@ bool getPackageName(IN JNIEnv *env, OUT char *pBufOut)
     //MYLOGI("%s", pBufOut);
     env->ReleaseStringUTFChars(str_PackageName, pPackaageName);
     return true;
+}
+/**
+ * 获取AndroidManifrest.xml配置Application中metaData定义的指定名的string字段
+ * 参数: env
+ *       metaName 对应的metaData名
+ *       pBufOut 传出结果
+ * 返回值: 结果可用返回true,否则返回false
+ */
+bool getStringMetaDate(IN JNIEnv *env, IN jstring metaName, OUT char *pOut)
+{
+    char temp[0xff] = "\0";
+    jobject mContext = getGlobalContext(env);
+    if(mContext == 0){
+        return false;
+    }
+    jclass cls_context = env->FindClass("android/content/Context");
+    if(cls_context == 0){
+        return false;
+    }
+    //PackageManager pm = ct.getPackageManager();
+    jmethodID methodgetPackageManager = env->GetMethodID(cls_context, "getPackageManager",
+                                                         "()Landroid/content/pm/PackageManager;");
+    if(methodgetPackageManager == 0){
+        return false;
+    }
+    //ct.getPackageName()
+    if(!getPackageName(env, temp))
+    {
+        return false;
+    }
+    //MYLOGI("%s", temp);
+    jstring strPackageName = env->NewStringUTF(temp);
+    //PackageManager pm = ct.getPackageManager();
+    jobject objPackageManager = env->CallObjectMethod(mContext, methodgetPackageManager);
+    if(objPackageManager == 0){
+        return false;
+    }
+    jclass clsPackageManager = env->GetObjectClass(objPackageManager);
+    if(clsPackageManager == 0){
+        return false;
+    }
+
+    jmethodID  id_ApplicationInfo = env->GetMethodID(clsPackageManager, "getApplicationInfo",
+                                                     "(Ljava/lang/String;I)Landroid/content/pm/ApplicationInfo;");
+    if(id_ApplicationInfo == 0){
+        return false;
+    }
+    //pm.getApplicationInfo(ct.getPackageName(), PackageManager.GET_META_DATA);
+    jobject objApplicationInfo = env->CallObjectMethod(objPackageManager, id_ApplicationInfo, strPackageName, 128);
+    if(objApplicationInfo == 0){
+        return false;
+    }
+    jclass clsApplicationInfo = env->GetObjectClass(objApplicationInfo);
+    if(clsApplicationInfo == 0){
+        return false;
+    }
+    jfieldID fid_metaData = env->GetFieldID(clsApplicationInfo, "metaData", "Landroid/os/Bundle;");
+    if(fid_metaData == 0){
+        return false;
+    }
+    jobject obj_metaData = env->GetObjectField(objApplicationInfo, fid_metaData);
+    if(obj_metaData == 0){
+        return false;
+    }
+    jclass cls_Bundle = env->FindClass("android/os/Bundle");
+    if(cls_Bundle == 0){
+        return false;
+    }
+    jmethodID id_getString = env->GetMethodID(cls_Bundle, "getString", "(Ljava/lang/String;)Ljava/lang/String;");
+    if(id_getString == 0){
+        return false;
+    }
+    //applicationInfo.metaData.getString
+    jstring string_get = (jstring)env->CallObjectMethod(obj_metaData, id_getString, metaName, "");
+    if(!string_get){
+        return false;
+    }
+
+    const char* pStrReal = env->GetStringUTFChars(string_get, false);
+    if(!pStrReal){
+        return false;
+    }
+    //MYLOGI("%s", pStrReal);
+    memcpy(pOut, pStrReal, strlen(pStrReal));
+    env->DeleteLocalRef(strPackageName);
+    return true;
+}
+//获取毫秒数信息
+long getUnixTime()
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    //MYLOGI("tv_sec %d", tv.tv_sec);
+    return tv.tv_sec;
+}
+/**
+ * 获取对应字符串的MD5摘要
+ */
+#define DIGEST_LEN 0x30
+bool getMD5(IN char *pStr, OUT char *pMD5)
+{
+    char Digest[DIGEST_LEN];
+    memset(Digest, 0, DIGEST_LEN);
+    if(pStr == NULL)
+        return false;
+
+    md5_state_t state;
+    md5_byte_t digest[16];
+
+    md5_init(&state);
+    md5_append(&state, (const md5_byte_t *) pStr, strlen(pStr));
+    md5_finish(&state, digest);
+
+    for (int i = 0; i < 16; ++i)
+    {
+        sprintf(Digest + i * 2, "%02x", digest[i]);
+    }
+
+    strcpy(pMD5, Digest);
+    return true;
+}
+/**
+ * 转换int为对应进制数据
+ */
+char* itoa_my(IN int value,OUT char *pBufOut,IN int radix)
+{
+    char zm[]="0123456789abcdefghijklmnopqrstuvwxyz";
+    char aa[100]={0};
+
+    int sum=value;
+    char *cp=pBufOut;
+    int i=0;
+
+    if(radix<2||radix>36)//增加了对错误的检测
+    {
+        MYLOGI("error data!");
+        return pBufOut;
+    }
+
+    if(value<0)
+    {
+        MYLOGI("error data!");
+        return pBufOut;
+    }
+
+    while(sum>0)
+    {
+        aa[i++]=zm[sum%radix];
+        sum/=radix;
+    }
+
+    for(int j=i-1;j>=0;j--)
+    {
+        *cp++=aa[j];
+    }
+    *cp='\0';
+    return pBufOut;
 }

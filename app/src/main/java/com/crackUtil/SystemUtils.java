@@ -6,6 +6,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.v7.widget.ThemedSpinnerAdapter;
+import android.text.format.Formatter;
 import android.util.Log;
 
 import android.os.Process;
@@ -15,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Iterator;
 
@@ -203,5 +205,89 @@ public class SystemUtils {
             }
         }
         return false;
+    }
+    public static String getOSName()
+    {
+        return System.getProperty("os.name");
+    }
+    public static String getVM_Version()
+    {
+        String vmVersion = System.getProperty("java.vm.version");
+        return vmVersion;
+    }
+    public static String getCurrentRuntimeValue()
+    {
+        String SELECT_RUNTIME_PROPERTY = "persist.sys.dalvik.vm.lib";
+        String LIB_DALVIK = "libdvm.so";
+        String LIB_ART = "libart.so";
+        String LIB_ART_D = "libartd.so";
+        try {
+            Class<?> systemProperties = Class.forName("android.os.SystemProperties");
+            try {
+                Method get = systemProperties.getMethod("get",
+                        String.class, String.class);
+                if (get == null) {
+                    return "WTF?!";
+                }
+                try {
+                    final String value = (String)get.invoke(
+                            systemProperties, SELECT_RUNTIME_PROPERTY,
+                        /* Assuming default is */"Dalvik");
+                    if (LIB_DALVIK.equals(value)) {
+                        return "Dalvik";
+                    } else if (LIB_ART.equals(value)) {
+                        return "ART";
+                    } else if (LIB_ART_D.equals(value)) {
+                        return "ART debug build";
+                    }
+
+                    return value;
+                } catch (IllegalAccessException e) {
+                    return "IllegalAccessException";
+                } catch (IllegalArgumentException e) {
+                    return "IllegalArgumentException";
+                } catch (InvocationTargetException e) {
+                    return "InvocationTargetException";
+                }
+            } catch (NoSuchMethodException e) {
+                return "SystemProperties.get(String key, String def) method is not found";
+            }
+        } catch (ClassNotFoundException e) {
+            return "SystemProperties class is not found";
+        }
+    }
+    public static String getAvailMemory(Context context) {// 获取android当前可用内存大小
+
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
+        am.getMemoryInfo(mi);
+        //mi.availMem; 当前系统的可用内存
+
+        return Formatter.formatFileSize(context, mi.availMem);// 将获取的内存大小规格化
+    }
+
+    public static String getTotalMemory(Context context) {
+        String str1 = "/proc/meminfo";// 系统内存信息文件
+        String str2;
+        String[] arrayOfString;
+        long initial_memory = 0;
+
+        try {
+            FileReader localFileReader = new FileReader(str1);
+            BufferedReader localBufferedReader = new BufferedReader(
+                    localFileReader, 8192);
+            str2 = localBufferedReader.readLine();// 读取meminfo第一行，系统总内存大小
+
+            arrayOfString = str2.split("\\s+");
+//            for (String num : arrayOfString) {
+//                Log.i(str2, num + "\t");
+//            }
+
+            initial_memory = Integer.valueOf(arrayOfString[1]).intValue() * 1024;// 获得系统总内存，单位是KB，乘以1024转换为Byte
+            localBufferedReader.close();
+
+        } catch (IOException e) {
+        }
+        return Formatter.formatFileSize(context, initial_memory);// Byte转换为KB或者MB，内存大小规格化
     }
 }
