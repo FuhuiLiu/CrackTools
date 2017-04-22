@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         str += '\n';
         str += "SimCountryIso: " + PhoneUtils.getSimCountryIso(MainActivity.this);
         str += '\n';
-        str += "手机号码: " + PhoneUtils.getLine1Number(MainActivity.this);
+        str += "SimNumber: " + PhoneUtils.getLine1Number(MainActivity.this);
         str += '\n';
         str += "NetworkOperator: " + PhoneUtils.getNetworkOperator(MainActivity.this);
         str += '\n';

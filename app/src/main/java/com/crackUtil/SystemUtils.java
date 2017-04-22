@@ -215,7 +215,7 @@ public class SystemUtils {
         String vmVersion = System.getProperty("java.vm.version");
         return vmVersion;
     }
-    public static String getCurrentRuntimeValue()
+    public static String getCurrentRuntimeValue2()
     {
         String SELECT_RUNTIME_PROPERTY = "persist.sys.dalvik.vm.lib";
         String LIB_DALVIK = "libdvm.so";
@@ -232,7 +232,7 @@ public class SystemUtils {
                 try {
                     final String value = (String)get.invoke(
                             systemProperties, SELECT_RUNTIME_PROPERTY,
-                        /* Assuming default is */"Dalvik");
+                        /* Assuming default is */"Unknow");
                     if (LIB_DALVIK.equals(value)) {
                         return "Dalvik";
                     } else if (LIB_ART.equals(value)) {
@@ -255,6 +255,36 @@ public class SystemUtils {
         } catch (ClassNotFoundException e) {
             return "SystemProperties class is not found";
         }
+    }
+
+    /**
+     * 获取当前系统运行模式
+     * @return 模式字符串
+     */
+    public static String getCurrentRuntimeValue()
+    {
+        String filePath = "/system/build.prop";// 系统内存信息文件
+        String strRead;
+        String[] arrayOfString;
+        try {
+            //读取/system/build.prop文件内容
+            FileReader localFileReader = new FileReader(filePath);
+            BufferedReader localBufferedReader = new BufferedReader(
+                    localFileReader, 8192);
+            do {
+                //挨行判断是否包含字符串persist.sys.dalvik.vm.lib
+                strRead = localBufferedReader.readLine();// 读取meminfo第一行，系统总内存大小
+                if (strRead.contains("persist.sys.dalvik.vm.lib"))
+                    break;
+            }while(true);
+            //"="号分割
+            arrayOfString = strRead.split("=");
+            localBufferedReader.close();
+            //等号右边就是当前系统加载SO
+            return arrayOfString[1].equals("libart.so") ? "ART" : "DALVIK";
+        } catch (IOException e) {
+        }
+        return "未知";
     }
     public static String getAvailMemory(Context context) {// 获取android当前可用内存大小
 
