@@ -54,6 +54,8 @@ extern "C" bool getIMSI(IN JNIEnv *env, OUT char *pOut);
 extern "C" bool getIMEI(IN JNIEnv *env, OUT char *pOut);
 //获取签名信息
 extern "C" bool getSelfMD5Sig(IN JNIEnv *env, OUT char *pBufOut);
+//获取AndroidManifrest.xml配置Application中metaData定义的指定名的字段的纯数字
+extern "C" bool getIntMetaDate(IN JNIEnv *env, IN jstring metaName, OUT char *pOut);
 //获取AndroidManifrest.xml配置Application中metaData定义的指定名的string字段
 extern "C" bool getStringMetaDate(IN JNIEnv *env, IN jstring metaName, OUT char *pOut);
 //获取当前APP的包名

@@ -34,7 +34,7 @@ public class FileUtils {
         //context.getFilesDir() => /data/data/com.example.testdemo/files
         String fullPath = ct.getDir("firstpaylibs", 0).getAbsolutePath() + File.separator + "DynamicTest_dx.jar";
         //调用DexClassLoader加载我们的dex文件
-        //Environment.getExternalStorageDirectory().toString() 4.1.2后App不能直接从sdcard中加载字节码
+        //Environment.getExternalStorageDirectory().toUTF8String() 4.1.2后App不能直接从sdcard中加载字节码
         String tempPath = ct.getDir("dyLoad", Context.MODE_PRIVATE).getAbsolutePath();
         DexClassLoader cl = new DexClassLoader(fullPath, tempPath, null, ct.getClassLoader());
         Class libProviderClass;

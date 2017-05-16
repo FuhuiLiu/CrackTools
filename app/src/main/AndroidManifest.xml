@@ -16,6 +16,7 @@
             </intent-filter>
         </activity>
         <!-- meta-data-->
+        <meta-data android:name="ZHUQUEOK_SDK_APKID" android:value="1234567890"/>
         <meta-data android:name="WRAP_SDK" android:value="com.sdkwrap.yxjd.Provider"/>
         <meta-data android:name="FILTER_DISABLE" android:value="true"/>
     </application>
@@ -24,4 +25,5 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
 </manifest>

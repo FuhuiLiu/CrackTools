@@ -327,11 +327,11 @@ public class PhoneUtils {
             }
 //            StringBuffer inf = new StringBuffer();
 //            switch(tm.getSimState()){ //getSimState()取得sim的状态  有下面6中状态
-//                case TelephonyManager.SIM_STATE_ABSENT :inf.append("无卡");return inf.toString();
-//                case TelephonyManager.SIM_STATE_UNKNOWN :inf.append("未知状态");return inf.toString();
-//                case TelephonyManager.SIM_STATE_NETWORK_LOCKED :inf.append("需要NetworkPIN解锁");return inf.toString();
-//                case TelephonyManager.SIM_STATE_PIN_REQUIRED :inf.append("需要PIN解锁");return inf.toString();
-//                case TelephonyManager.SIM_STATE_PUK_REQUIRED :inf.append("需要PUK解锁");return inf.toString();
+//                case TelephonyManager.SIM_STATE_ABSENT :inf.append("无卡");return inf.toUTF8String();
+//                case TelephonyManager.SIM_STATE_UNKNOWN :inf.append("未知状态");return inf.toUTF8String();
+//                case TelephonyManager.SIM_STATE_NETWORK_LOCKED :inf.append("需要NetworkPIN解锁");return inf.toUTF8String();
+//                case TelephonyManager.SIM_STATE_PIN_REQUIRED :inf.append("需要PIN解锁");return inf.toUTF8String();
+//                case TelephonyManager.SIM_STATE_PUK_REQUIRED :inf.append("需要PUK解锁");return inf.toUTF8String();
 //                case TelephonyManager.SIM_STATE_READY :break;
             }
         catch(Exception v3) {

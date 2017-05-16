@@ -12,10 +12,13 @@ cmake_minimum_required(VERSION 3.4.1)
 
 #生成共享库名、类型及源文件，注意这里的源文件不要加后缀，它会自己拼
 add_library( native SHARED src/main/jni/native src/main/jni/common/Art src/main/jni/common/common
-    src/main/jni/common/md5)
+    src/main/jni/common/md5 src/main/jni/libghttp/ghttp src/main/jni/libghttp/http_base64
+    src/main/jni/libghttp/http_date src/main/jni/libghttp/http_hdrs src/main/jni/libghttp/http_req
+    src/main/jni/libghttp/http_resp src/main/jni/libghttp/http_trans src/main/jni/libghttp/http_uri)
 
 include_directories(src/main/jni/)
 include_directories(src/main/jni/common/)
+include_directories(src/main/jni/libghttp/)
 
 #日志相关
 find_library( log-lib log )

@@ -2,12 +2,11 @@ package aqcxbom.cracktools;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import android.os.Process;
 import android.text.method.ScrollingMovementMethod;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
@@ -16,17 +15,26 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.JSONTest.Pet;
-import com.JSONTest.myJson;
 import com.crackUtil.AppInfoUtils;
 import com.crackUtil.GZipUtils;
 import com.crackUtil.PhoneUtils;
 import com.crackUtil.SystemUtils;
 import com.crackUtil.LogUtils;
+import com.encryptionOP.EncryptionUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.Signature;
-import java.util.Date;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.Key;
+import java.security.spec.AlgorithmParameterSpec;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import static com.crackUtil.PhoneUtils.TYPE_CMOBILE;
 import static com.crackUtil.PhoneUtils.TYPE_CTELNET;
@@ -34,11 +42,15 @@ import static com.crackUtil.PhoneUtils.TYPE_CUION;
 
 public class MainActivity extends AppCompatActivity implements OnClickListener {
     public static Activity mActivity;
-    private EditText mEditTextPackName;
-    private TextView mTextViewSigInfo;
-    private Button mBtnGetInfo;
-    private Button mBtnGetSig;
+    private static EditText mEditTextPackName;
+    private static TextView mTextViewSigInfo;
+    private static Button mBtnGetInfo;
+    private static Button mBtnGetSig;
+    private static Button mBtnTest;
+    private static Button mBtnClickTest;
 
+    public static native void JNITest();
+    public static native void JNITest(Button btnClickBtn);
     public native String getSring();
     static{
         System.loadLibrary("native");
@@ -55,69 +67,25 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         mBtnGetSig.setOnClickListener(this);
         mBtnGetInfo = (Button)findViewById(R.id.btnInfo);
         mBtnGetInfo.setOnClickListener(this);
-
-        LogUtils.DOLOG(SystemUtils.getAvailMemory(this));
-        LogUtils.DOLOG(SystemUtils.getTotalMemory(this));
-//        long free=0;
-//        long use=0;
-//        long total=0;
-//        long maxcanuse=0;
-//        int kb=1024;
-//        Runtime rt=Runtime.getRuntime();
-//        total=rt.totalMemory();
-//        free=rt.freeMemory();
-//        maxcanuse=rt.maxMemory();
-//        use=total-free;
-//        System.out.println("系统内存已用的空间为："+use/kb+" MB");
-//        System.out.println("系统内存的空闲空间为："+free/kb+" MB");
-//        System.out.println("系统内存的最大可使用空间为："+maxcanuse/kb+" MB");
-//        System.out.println("系统内存的最大可使用空间为："+maxcanuse/kb/kb+" GB");
-//        System.out.println("系统总内存空间为："+total/kb+" MB");
-
-
-//        LogUtils.DOLOG(getSring());
-//        myJson.test();
-
-//        FileUtils.readFile(this);
-//        FileUtils.getMetaData(this);
-//        //这个有点问题
-//        FileUtils.readchannelfile(this, "222");
-//        //文件释放+动态加载
-//        FileUtils.releaseLib(this);
-//        FileUtils.dyLoad(this);
-
-        //LogUtils.write("log now");
-
-//        SystemUtils.isExistService(this, "xxx");
-//        SystemUtils.ergodicProcess(this);
-//        SystemUtils.isExistProcess(this, this.getPackageName());
-//        LogUtils.DOLOG("getCPUABI", SystemUtils.getCPUABI());
-//        LogUtils.DOLOG("getAppLabel", SystemUtils.getAppLabel(this));
-//        LogUtils.DOLOG("getSystemVersion", "" + SystemUtils.getSystemVersion());
-//        LogUtils.DOLOG("getCpuInfo", "" + SystemUtils.getCpuInfo());
-//        LogUtils.DOLOG("getPPid", "" + SystemUtils.getPPid(Process.myPid()));
-//        LogUtils.DOLOG("isRoot", "" + SystemUtils.isRoot());
-//        SystemUtils.listInstalledPackage(this);
-
-//        LogUtils.DOLOG("isSimExist", "" + PhoneUtils.isSimExist(this));
-//        LogUtils.DOLOG("isOnline", "" + PhoneUtils.isOnline(this));
-//        LogUtils.DOLOG("getIMEI", PhoneUtils.getIMEI(this));
-//        LogUtils.DOLOG("getIMSI", PhoneUtils.getIMSI(this));
-//        LogUtils.DOLOG("getAndroidID", PhoneUtils.getAndroidID(this));
-//        LogUtils.DOLOG("getNetworkOperator", PhoneUtils.getNetworkOperator(this));
-//        LogUtils.DOLOG("getProvidersType","" +  PhoneUtils.getProvidersType(this));
-//        LogUtils.DOLOG("getLine1Number","" +  PhoneUtils.getLine1Number(this));
-//        LogUtils.DOLOG("getSimCountryIso","" +  PhoneUtils.getSimCountryIso(this));
-//        LogUtils.DOLOG("getSimSerialNumber","" +  PhoneUtils.getSimSerialNumber(this));
-//        LogUtils.DOLOG("getSimUsable","" +  PhoneUtils.getSimUsable(this));
-//        LogUtils.DOLOG("isMainProcess","" +  PhoneUtils.isMainProcess(this));
-//        LogUtils.DOLOG("getSubscriberId1","" +  PhoneUtils.getIMSI(this, 1));
-//        LogUtils.DOLOG("getSubscriberId2","" +  PhoneUtils.getIMSI(this, 2));
-//        LogUtils.DOLOG("getMacAddress","" +  PhoneUtils.getMacAddress(this));
-
-//        LogUtils.DOLOG("getAppVersion","" +  AppInfoUtils.getAppVersion(this));
+        mBtnTest = (Button)findViewById(R.id.btnTest);
+        mBtnTest.setOnClickListener(this);
+        mBtnClickTest = (Button)findViewById(R.id.btnClickTestBtn);
+        mBtnClickTest.setOnClickListener(this);
     }
-
+    private static void btnTest()
+    {
+        LogUtils.DOLOG("测试按钮被点击！");
+        EncryptionUsage();
+    }
+    private static void btnClickTest()
+    {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                JNITest(mBtnTest);
+            }
+        }).start();
+    }
     private static void GZipTestfun()
     {
         String strTest = "66fe4d02dc7a0b5240373c12429b19d68e5d2b92795d579121c4465f3d1bfa90f94360e2ac76179e10c606457da165723b3b808f0dcdf09edf5bb8d95bef6282478f2ad9a0f8f79fa15e4475512c71cf23a0fc77ef417703c5e7792ffef8a75dd7c77c90fb51aa98da82cf08f613b543c3157699d31d994dfa62f0a108745c0ee56778a1b67ca4844de7be7df9cfa2136629d3cc210a0d9282f2f456aa51c7f0a4f7475a2a667b1345e1caae146ce8da0cee9c0dd2ea2cfb7df98ebdc510567b9fb7e2cbaf35b820aa7502c73767135be83212a27fb5ccc51c710c338b3b3aeae04724f3eea57200c74d50dc637272c6176a477c4a8d42db85dd21a1fc3ffb44b9ae2abe9b9a249ee2f5fbca4f166e80e8d34aa8461a5a4c178a265df34e4e18a5e3560deb487b86";
@@ -163,6 +131,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             break;
         case R.id.btnGetSig:
             getSig();
+            break;
+        case R.id.btnTest:
+            btnTest();
+            break;
+        case R.id.btnClickTestBtn:
+            btnClickTest();
             break;
         default:
         }
@@ -241,6 +215,32 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         if (view != null) {
             InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+    //加解密使用示例
+    private static void EncryptionUsage()
+    {
+        try {
+            InputStream is = MainActivity.mActivity.getAssets().open("cmnraw/data_pay_base");
+            String strSavePath = MainActivity.mActivity.getFilesDir().getAbsoluteFile() + File.separator + "sdk_pay_base";
+            FileOutputStream fos = new FileOutputStream(strSavePath);
+            EncryptionUtils.decodeFileContextAndSave(is, fos, "sdk_config");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            InputStream is = MainActivity.mActivity.getAssets().open("cmnraw/config.xml");
+            String read = EncryptionUtils.read2UTF8String(is);
+            String decode = EncryptionUtils.decode2UTF8Str(read, "sdk_config");
+            LogUtils.DOLOG(decode);
+
+            byte[] byteAry = EncryptionUtils.encode2UTF8Str(decode, "sdk_config");
+            String enResult = EncryptionUtils.converbyteAry2String(byteAry);
+            LogUtils.DOLOG(enResult);
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

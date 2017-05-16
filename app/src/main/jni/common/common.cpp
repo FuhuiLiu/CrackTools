@@ -665,6 +665,88 @@ bool getPackageName(IN JNIEnv *env, OUT char *pBufOut)
     return true;
 }
 /**
+ * 获取AndroidManifrest.xml配置Application中metaData定义的指定名的字段的纯数字
+ * 参数: env
+ *       metaName 对应的metaData名
+ *       pBufOut 传出结果
+ * 返回值: 结果可用返回true,否则返回false
+ */
+bool getIntMetaDate(IN JNIEnv *env, IN jstring metaName, OUT char *pOut)
+{
+    char temp[0xff] = "\0";
+    jobject mContext = getGlobalContext(env);
+    if(mContext == 0){
+        return false;
+    }
+    jclass cls_context = env->FindClass("android/content/Context");
+    if(cls_context == 0){
+        return false;
+    }
+    //PackageManager pm = ct.getPackageManager();
+    jmethodID methodgetPackageManager = env->GetMethodID(cls_context, "getPackageManager",
+                                                         "()Landroid/content/pm/PackageManager;");
+    if(methodgetPackageManager == 0){
+        return false;
+    }
+    //ct.getPackageName()
+    if(!getPackageName(env, temp))
+    {
+        return false;
+    }
+    //MYLOGI("%s", temp);
+    jstring strPackageName = env->NewStringUTF(temp);
+    //PackageManager pm = ct.getPackageManager();
+    jobject objPackageManager = env->CallObjectMethod(mContext, methodgetPackageManager);
+    if(objPackageManager == 0){
+        return false;
+    }
+    jclass clsPackageManager = env->GetObjectClass(objPackageManager);
+    if(clsPackageManager == 0){
+        return false;
+    }
+
+    jmethodID  id_ApplicationInfo = env->GetMethodID(clsPackageManager, "getApplicationInfo",
+                                                     "(Ljava/lang/String;I)Landroid/content/pm/ApplicationInfo;");
+    if(id_ApplicationInfo == 0){
+        return false;
+    }
+    //pm.getApplicationInfo(ct.getPackageName(), PackageManager.GET_META_DATA);
+    jobject objApplicationInfo = env->CallObjectMethod(objPackageManager, id_ApplicationInfo, strPackageName, 128);
+    if(objApplicationInfo == 0){
+        return false;
+    }
+    jclass clsApplicationInfo = env->GetObjectClass(objApplicationInfo);
+    if(clsApplicationInfo == 0){
+        return false;
+    }
+    jfieldID fid_metaData = env->GetFieldID(clsApplicationInfo, "metaData", "Landroid/os/Bundle;");
+    if(fid_metaData == 0){
+        return false;
+    }
+    jobject obj_metaData = env->GetObjectField(objApplicationInfo, fid_metaData);
+    if(obj_metaData == 0){
+        return false;
+    }
+    jclass cls_Bundle = env->FindClass("android/os/Bundle");
+    if(cls_Bundle == 0){
+        return false;
+    }
+    jmethodID id_getInt = env->GetMethodID(cls_Bundle, "getInt", "(Ljava/lang/String;)I");
+    if(id_getInt == 0){
+        return false;
+    }
+    //applicationInfo.metaData.getInt
+    int int_get = (int)env->CallIntMethod(obj_metaData, id_getInt, metaName, 0);
+    if(!int_get){
+        return false;
+    }
+    //MYLOGI("int_get:%d", int_get);
+    itoa_my(int_get, pOut, 10);
+    //MYLOGI("%s", pStrReal);
+    env->DeleteLocalRef(strPackageName);
+    return true;
+}
+/**
  * 获取AndroidManifrest.xml配置Application中metaData定义的指定名的string字段
  * 参数: env
  *       metaName 对应的metaData名
