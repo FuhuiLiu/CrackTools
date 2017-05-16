@@ -3,6 +3,7 @@
 更新细节
 2017/5/16 17:45:12
 1.增加文件加解密使用示例。
+2.增加权限检测代码。
 
 2017/4/21 19:29:20
 1.增加JNI层直接拿APK信息：AndroidID\IMSI\IMEI\getSelfMD5Sig\getStringMetaDate。

@@ -75,7 +75,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private static void btnTest()
     {
         LogUtils.DOLOG("测试按钮被点击！");
-        EncryptionUsage();
+        boolean bRet = AppInfoUtils.checkPermission(MainActivity.mActivity, "android.permission.ACCESS_NETWORK_STATE");
+        LogUtils.DOLOG("" + bRet);
     }
     private static void btnClickTest()
     {

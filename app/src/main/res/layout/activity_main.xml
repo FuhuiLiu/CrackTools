@@ -44,6 +44,7 @@
         android:layout_below="@id/package_edt"
         android:scrollbars="vertical"/>
     <Button
+        android:visibility="invisible"
         android:id="@+id/btnClickTestBtn"
         android:text="点击测试按钮"
         android:layout_below="@id/btnTest"

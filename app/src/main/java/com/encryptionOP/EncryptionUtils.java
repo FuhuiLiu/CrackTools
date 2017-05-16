@@ -121,6 +121,10 @@ public class EncryptionUtils {
     public static byte[] converString2byteAry(String strArg) {
         int nNeed = strArg.length() / 2;
         byte[] temp = new byte[nNeed];
+        /**
+         * 做类似的转换
+         * "1cf098" ==> 0x1c 0xf0 0x98
+         */
         for(int i = 0; i < nNeed; ++i) {
             //两两取出字符串数据并转成int值，取出其byte值保存
             String strSub = strArg.substring(i * 2, i * 2 + 2);
@@ -238,6 +242,10 @@ public class EncryptionUtils {
 //        return new String(charAry);
 
         StringBuilder sb = new StringBuilder();
+        /**
+         * 做类似的转换
+         * 0x1c 0xf0 0x98 ==> "1cf098"
+         */
         for (int i = 0; i < byteAry.length; i++)
         {
             byte b = byteAry[i];

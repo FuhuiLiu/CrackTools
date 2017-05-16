@@ -188,4 +188,16 @@ public class AppInfoUtils {
         catch (Exception localException) {}
         return null;
     }
+
+    /**
+     * 权限检查
+     * @param context
+     * @param PermissionName 权限字符串
+     * @return 具备对应权限返回true否则false
+     */
+    public static boolean checkPermission(Context context, String PermissionName) {
+        boolean bool = context.getPackageManager().checkPermission(PermissionName, context.getPackageName()) == 0;
+        return bool;
+    }
+
 }
