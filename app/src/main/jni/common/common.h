@@ -64,7 +64,7 @@ extern "C" bool getPackageName(IN JNIEnv *env, OUT char *pBufOut);
 extern "C" void showSelfSig(IN JNIEnv *env);
 
 //获取毫秒数信息
-extern "C" long getUnixTime();
+//extern "C" long long getUnixTime();
 //获取对应字符串的MD5摘要
 extern "C" bool getMD5(IN char *pStr, OUT char *pMD5);
 //转换int为对应进制数据

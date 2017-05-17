@@ -832,14 +832,18 @@ bool getStringMetaDate(IN JNIEnv *env, IN jstring metaName, OUT char *pOut)
     env->DeleteLocalRef(strPackageName);
     return true;
 }
-//获取毫秒数信息
-long getUnixTime()
-{
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    //MYLOGI("tv_sec %d", tv.tv_sec);
-    return tv.tv_sec;
-}
+/**
+ * 获取毫秒数信息
+ * 变成long long int getUnixTime()是什么鬼？？
+ * 函数调用结果会无法以long long类型返回而是以int类型，造成结果异常（%lld输出long long类型）
+ *
+//long long getUnixTime()
+//{
+//    struct timeval tv;
+//    gettimeofday(&tv, NULL);
+//    //MYLOGI("tv_sec %d", tv.tv_sec);
+//    return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+//}
 /**
  * 获取对应字符串的MD5摘要
  */
