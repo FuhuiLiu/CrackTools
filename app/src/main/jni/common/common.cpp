@@ -834,16 +834,15 @@ bool getStringMetaDate(IN JNIEnv *env, IN jstring metaName, OUT char *pOut)
 }
 /**
  * 获取毫秒数信息
- * 变成long long int getUnixTime()是什么鬼？？
- * 函数调用结果会无法以long long类型返回而是以int类型，造成结果异常（%lld输出long long类型）
- *
-//long long getUnixTime()
-//{
-//    struct timeval tv;
-//    gettimeofday(&tv, NULL);
-//    //MYLOGI("tv_sec %d", tv.tv_sec);
-//    return tv.tv_sec * 1000 + tv.tv_usec / 1000;
-//}
+ */
+long long getUnixTime()
+{
+    long long nValue = 1;
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    //MYLOGI("tv_sec %d", tv.tv_sec);
+    return (long long)(nValue * tv.tv_sec * 1000 + tv.tv_usec / 1000);
+}
 /**
  * 获取对应字符串的MD5摘要
  */
@@ -873,12 +872,12 @@ bool getMD5(IN char *pStr, OUT char *pMD5)
 /**
  * 转换int为对应进制数据
  */
-char* itoa_my(IN int value,OUT char *pBufOut,IN int radix)
+char* itoa_my(IN long long value,OUT char *pBufOut,IN int radix)
 {
     char zm[]="0123456789abcdefghijklmnopqrstuvwxyz";
     char aa[100]={0};
 
-    int sum=value;
+    long long sum=value;
     char *cp=pBufOut;
     int i=0;
 

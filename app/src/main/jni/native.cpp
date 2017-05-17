@@ -21,6 +21,7 @@ static JNINativeMethod gMethods[] = {
 void test(JNIEnv *env)
 {
     char temp[0xff] = "\0";
+    MYLOGI("%lld", getUnixTime());
 }
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
