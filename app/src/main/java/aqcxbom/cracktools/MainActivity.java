@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.Key;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.Cipher;
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private static Button mBtnGetSig;
     private static Button mBtnTest;
     private static Button mBtnClickTest;
+    private static Button mBtnGenerateLink;
 
     public static native void JNITest();
     public static native void JNITest(Button btnClickBtn);
@@ -61,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         setContentView(R.layout.activity_main);
         mActivity = this;
         mTextViewSigInfo = (TextView) findViewById(R.id.text);
-        mTextViewSigInfo.setMovementMethod(ScrollingMovementMethod.getInstance());
+        //mTextViewSigInfo.setMovementMethod(ScrollingMovementMethod.getInstance());
         mEditTextPackName = (EditText)findViewById(R.id.package_edt);
         mBtnGetSig = (Button)findViewById(R.id.btnGetSig);
         mBtnGetSig.setOnClickListener(this);
@@ -71,6 +74,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         mBtnTest.setOnClickListener(this);
         mBtnClickTest = (Button)findViewById(R.id.btnClickTestBtn);
         mBtnClickTest.setOnClickListener(this);
+        mBtnGenerateLink = (Button)findViewById(R.id.btnGenerateLink);
+        mBtnGenerateLink.setOnClickListener(this);
     }
     private static void btnTest()
     {
@@ -86,6 +91,38 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 JNITest(mBtnTest);
             }
         }).start();
+    }
+    private static void btnGenerateLink()
+    {
+        try {
+            String appKey = mEditTextPackName.getText().toString();
+            if (appKey == null || appKey.isEmpty())
+            {
+                mTextViewSigInfo.setText("输入AppKey");
+                return;
+            }
+            String FMT = "sdk_version=%s&reason=%d&apk_key=%s&apk_keyso=%s&package_name=%s&apk_sig=%s&android_id=%s&imei=%s&imsi=%s&sim=%s&timestamp=%s";
+            String MD5VERIFYCODE = "d577dd1a3489655f63a58d1a52a8e0b9"; //与版本有关的MD5固定串
+            //获取app签名MD5+固定串求其MD5摘要并转成String
+            String appsig = AppInfoUtils.getSign(mActivity);
+            String appsig2 = appsig + MD5VERIFYCODE;
+            byte[] sig2Digest = MessageDigest.getInstance("MD5").digest(appsig2.getBytes());
+            String strsig2Digest = EncryptionUtils.converbyteAry2String(sig2Digest);
+            //生成固定验证格式请求
+            String baseData = String.format(FMT.toLowerCase(), 0.2, 0, appKey, appKey, AppInfoUtils.getPackageName(mActivity), strsig2Digest, PhoneUtils.getAndroidID(mActivity),
+                    PhoneUtils.getIMEI(mActivity), PhoneUtils.getIMSI(mActivity), PhoneUtils.getSimSerialNumber(mActivity), System.currentTimeMillis());
+            //对生成固定验证+固定串再求其MD5摘要并转成String
+            String baseData2 = baseData + MD5VERIFYCODE;
+            byte[] baseData2Digest = MessageDigest.getInstance("MD5").digest(baseData2.getBytes());
+            String strbaseData2Digest = EncryptionUtils.converbyteAry2String(baseData2Digest);
+            //结果拼到固定验证后面以sig标识，形成最终的验证串
+            String baseDataResult = String.format("%s&sig=%s", baseData, strbaseData2Digest);
+            //拼上远程网址并显示
+            String link = "http://cnsdk.zhuqueok.com/ab_api/plugin.php?"+baseDataResult;
+            mTextViewSigInfo.setText(link);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
     }
     private static void GZipTestfun()
     {
@@ -138,6 +175,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             break;
         case R.id.btnClickTestBtn:
             btnClickTest();
+            break;
+        case R.id.btnGenerateLink:
+            btnGenerateLink();
             break;
         default:
         }

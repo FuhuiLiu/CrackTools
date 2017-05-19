@@ -19,6 +19,13 @@ public class AppInfoUtils {
     public static String MD5Code;
 
     //获取当前包版本信息 PackageInfo还有很多与APP信息相关字段
+    public static String getPackageName(Context ct)
+    {
+        PackageManager pm = ct.getPackageManager();
+        String packName = ct.getPackageName();
+        return packName;
+    }
+    //获取当前包版本信息 PackageInfo还有很多与APP信息相关字段
     public static String getAppVersion(Context ct)
     {
         PackageManager pm = ct.getPackageManager();

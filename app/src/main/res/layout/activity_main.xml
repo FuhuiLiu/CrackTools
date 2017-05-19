@@ -15,7 +15,7 @@
 
     <EditText
         android:id="@+id/package_edt"
-        android:hint="输入目标包名"
+        android:hint="参数输入区"
         android:layout_width="100dp"
         android:layout_height="wrap_content"/>
     <Button
@@ -42,13 +42,22 @@
         android:layout_height="wrap_content"
         android:text="Hello World!"
         android:layout_below="@id/package_edt"
-        android:scrollbars="vertical"/>
+        android:scrollbars="vertical"
+        android:textIsSelectable="true"/>
     <Button
         android:visibility="invisible"
         android:id="@+id/btnClickTestBtn"
         android:text="点击测试按钮"
         android:layout_below="@id/btnTest"
         android:layout_alignLeft="@id/btnTest"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:visibility="visible"
+        android:id="@+id/btnGenerateLink"
+        android:text="生成测试链接"
+        android:layout_below="@id/btnInfo"
+        android:layout_alignLeft="@id/btnInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 </RelativeLayout>

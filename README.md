@@ -1,6 +1,9 @@
-# My CrackTools by AqCxBoM!
+# CrackTools by AqCxBoM!
 
 更新细节
+2017/5/19 11:35:12
+1.小功能更新
+
 2017/5/17 14:32:45
 1.修复JNI获取毫秒数精度问题。
 
