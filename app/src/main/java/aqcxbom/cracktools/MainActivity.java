@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.JSONTest.myJson;
 import com.crackUtil.AppInfoUtils;
 import com.crackUtil.GZipUtils;
 import com.crackUtil.PhoneUtils;
@@ -80,8 +81,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private static void btnTest()
     {
         LogUtils.DOLOG("测试按钮被点击！");
-        boolean bRet = AppInfoUtils.checkPermission(MainActivity.mActivity, "android.permission.ACCESS_NETWORK_STATE");
-        LogUtils.DOLOG("" + bRet);
+        JSONUsage();
     }
     private static void btnClickTest()
     {
@@ -257,6 +257,17 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+    // json生成加密
+    private static void JSONUsage(){
+        String ct = myJson.initJson();
+        byte[] result = EncryptionUtils.encode2UTF8Str(ct, "sdk_config");
+        String str = EncryptionUtils.converbyteAry2String(result);
+        LogUtils.DOLOG(str);
+
+        String crypt = "5f91a0e4fd77c641d2b904415b65669963806d7b239b7192ba2634dad108b4cfc635c4dbf87af6353818c683c3be5d01ed1ac2264e48cdd633bcec4217b9e89c6c05405a87bce93c67cf48e24658c05aa73a33df60293593c41dd29553db8282005c9b8663cdfa238f2e19f59cc0a62ae38768148e4e42981ddebc6304b71273d3b9b07d6c3ffb1e862123420a8b862c2879e72b33733037593f8f97670af72a5e87d0d142e7ff8e4b16b19b34dd726de62fc10d16a27d1313160f70ebcd41c44b8bc9564148b793d4f726caf43f6aa7485dc7a2bb835e0a863ec5345051b4038ee1d8c1bfc97f0867de8686baeca92988f96658a713254bd7b84f92f497cefe14a2c21a2608d57a41875187a822c4fccf4cca66cdd3869a641a712e98fe7b701273e9362b179f57e0298c2dc2687b4b33068100e5fee9d6358caccc7c207861e0d464e9fdc9586cc3dd09dc75c82fb03e510e0b5866edc5fcb303b56cf3e9cca865454f944c5d47a712c5cc2b106633da590faad6b061aa985901f19113286077b9f0c3140b5541";
+        String decrypt = EncryptionUtils.decode2UTF8Str(crypt, "sdk_config");
+        LogUtils.DOLOG(decrypt);
     }
     //加解密使用示例
     private static void EncryptionUsage()

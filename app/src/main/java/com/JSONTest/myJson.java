@@ -18,22 +18,53 @@ public class myJson {
     {
         Log.i(TAG, ct);
     }
-    static public void test()
-    {
-        initJson();
-    }
-    static public void initJson()
+    static public String initJson()
     {
         try {
             JSONObject jsonResult = new JSONObject();
 
+            //构造电信结构
+            JSONObject jsonEgame = new JSONObject();
+            jsonEgame.put("TwiceDlg_STACK_CLASSPATH", "cn.egame.terminal.paysdk.ah");
+            jsonEgame.put("TwiceDlg_STACK_METHODNAME", "e");
+            jsonEgame.put("PayingDlg_STACK_CLASSPATH", "cn.egame.terminal.paysdk.cv");
+            jsonEgame.put("PayingDlg_STACK_METHODNAME", "a");
+            jsonEgame.put("BillFinishDlg_STACK_CLASSPATH", "");
+            jsonEgame.put("BillFinishDlg_STACK_METHODNAME", "");
+            jsonEgame.put("PayingString", "支付中");
+            jsonEgame.put("ConfirmPay", "确认支付");
+            jsonEgame.put("Confirm", "确定");
+            jsonEgame.put("MoneyPrefix", "");
+            jsonEgame.put("MemorySuffix", "元/次");
+            jsonEgame.put("ZhifuChenggong", "支付成功");
+            jsonEgame.put("ZhifuShibai", "支付失败");
+
+            //构造咪咕结构
+            JSONObject jsonMigu = new JSONObject();
+            jsonMigu.put("TwiceDlg_STACK_CLASSPATH", "cn.cmgame2_0.global_manager.ChargeDataManager$1");
+            jsonMigu.put("TwiceDlg_STACK_METHODNAME", "completed");
+            jsonMigu.put("PayingDlg_STACK_CLASSPATH", "cn.cmgame2_0.utils.UIUtil");
+            jsonMigu.put("PayingDlg_STACK_METHODNAME", "showProgressDialog");
+            jsonMigu.put("BillFinishDlg_STACK_CLASSPATH", "cn.cmgame2_0.billing_model.view.C.billing.a.a$1");
+            jsonMigu.put("BillFinishDlg_STACK_METHODNAME", "onBillingFinish");
+            jsonMigu.put("PayingString", "");
+            jsonMigu.put("ConfirmPay", "确认支付");
+            jsonMigu.put("Confirm", "确定");
+            jsonMigu.put("MoneyPrefix", "￥");
+            jsonMigu.put("MemorySuffix", "");
+            jsonMigu.put("Zhifu", "支付");
+            jsonMigu.put("Chenggong", "成功");
+
+            JSONObject jsonsdk_callback = new JSONObject();
+            jsonsdk_callback.put("mainclass", "cn.cmpay.base.wrapper.SDKCallbackWrapper");
+
             JSONObject jsonsdk_base = new JSONObject();
             jsonsdk_base.put("force", false);
             jsonsdk_base.put("ui", true);
-            jsonsdk_base.put("mainclass", "com.cmnpay.base.SDKBase");
+            jsonsdk_base.put("mainclass", "cn.cmpay.base.SDKBase");
 
             JSONObject jsonfiles = new JSONObject();
-            jsonfiles.put("name", "sdk_base");
+            jsonfiles.put("name", "data_pay_base");
             jsonfiles.put("sig", "547b68ebb2ad8a3207f96c5b8b25938c");
 
             JSONArray jaryFiles = new JSONArray();
@@ -43,46 +74,36 @@ public class myJson {
             JSONObject jsonsdk_pay = new JSONObject();
             jsonsdk_pay.put("force", false);
             jsonsdk_pay.put("ui", true);
-            jsonsdk_pay.put("mainclass", "com.cmnpay.base.SDKBase");
+            jsonsdk_pay.put("mainclass", "cn.cmpay.pay.CommonPay");
 
             JSONObject jsonpayfiles1 = new JSONObject();
             jsonpayfiles1.put("name", "sdk_pay_base");
             jsonpayfiles1.put("sig", "b1881e280ca8fdb7ed3cb233f9747733");
-            JSONObject jsonpayfiles2 = new JSONObject();
-            jsonpayfiles2.put("name", "sdk_pay_cmcc");
-            jsonpayfiles2.put("sig", "649af7fbee43900cf7c15a071209c243");
-            JSONObject jsonpayfiles3 = new JSONObject();
-            jsonpayfiles3.put("name", "sdk_pay_dep");
-            jsonpayfiles3.put("sig", "d787f4dd56fa7ddd7cb0703664e30d64");
-            JSONObject jsonpayfiles4 = new JSONObject();
-            jsonpayfiles4.put("name", "sdk_pay_general");
-            jsonpayfiles4.put("sig", "fb787466cda963a1db939f43cc701e00");
-            JSONObject jsonpayfiles5 = new JSONObject();
-            jsonpayfiles5.put("name", "sdk_pay_others");
-            jsonpayfiles5.put("sig", "5d05a503c28f5e6e723c7f8c2a24cbe8");
-            JSONObject jsonpayfiles6 = new JSONObject();
-            jsonpayfiles6.put("name", "sdk_pay_union");
-            jsonpayfiles6.put("sig", "4c581ab47c04c9f716e83a93f588a0ac");
 
             //中括号"[]"中的是数组形式
             JSONArray jaryPayFiles = new JSONArray();
             jaryPayFiles.put(jsonpayfiles1);
-            jaryPayFiles.put(jsonpayfiles2);
-            jaryPayFiles.put(jsonpayfiles3);
-            jaryPayFiles.put(jsonpayfiles4);
-            jaryPayFiles.put(jsonpayfiles5);
-            jaryPayFiles.put(jsonpayfiles6);
             jsonsdk_pay.put("files", jaryPayFiles);
 
-            jsonResult.put("version", "0.1");
+            jsonResult.put("version", "0.2");
             jsonResult.put("sdk_base", jsonsdk_base);
             jsonResult.put("sdk_pay", jsonsdk_pay);
+            jsonResult.put("sdk_callback", jsonsdk_callback);
+
+            //新增
+            jsonResult.put("jarKey", "sdk_config");
+            jsonResult.put("xmlKey", "sdk_config");
+            jsonResult.put("LOGSERVERADDR", "http://cnsdk.zhuqueok.com/ab_api/plugin_log.php?");
+            jsonResult.put("EgameCfg", jsonEgame);
+            jsonResult.put("MiguCfg", jsonMigu);
 
             LogUtils.DOLOG(jsonResult.toString());
+            return jsonResult.toString();
             //{"sdk_pay":{"ui":true,"files":[{"sig":"b1881e280ca8fdb7ed3cb233f9747733","name":"sdk_pay_base"},{"sig":"649af7fbee43900cf7c15a071209c243","name":"sdk_pay_cmcc"},{"sig":"d787f4dd56fa7ddd7cb0703664e30d64","name":"sdk_pay_dep"},{"sig":"fb787466cda963a1db939f43cc701e00","name":"sdk_pay_general"},{"sig":"5d05a503c28f5e6e723c7f8c2a24cbe8","name":"sdk_pay_others"},{"sig":"4c581ab47c04c9f716e83a93f588a0ac","name":"sdk_pay_union"}],"mainclass":"com.cmnpay.base.SDKBase","force":false},"sdk_base":{"ui":true,"files":[{"sig":"547b68ebb2ad8a3207f96c5b8b25938c","name":"sdk_base"}],"mainclass":"com.cmnpay.base.SDKBase","force":false},"version":"0.1"}
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return null;
     }
     static public void JsonAnalysis(String json)
     {

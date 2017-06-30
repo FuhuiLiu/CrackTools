@@ -71,7 +71,6 @@ public class EncryptionUtils {
      */
     public static String decode2UTF8Str(String oldStr, String keyString) {
         int v6 = 8;
-        String str = null;
         try {
             //先转成原始byteAry
             byte[] byteAry1 = EncryptionUtils.converString2byteAry(oldStr);
