@@ -409,7 +409,6 @@ bool getDeviceID_Serial(char *deviceID)//serial number
  */
 bool getSelfMD5Sig(IN JNIEnv *env, OUT char *pBufOut)
 {
-    MYLOGI("showSelfSig");
     jstring strSig = getApkSignature(env, getGlobalContext(env));
 
     jbyteArray objdigestResult = GetMD5Hash(env, strSig);
@@ -418,12 +417,11 @@ bool getSelfMD5Sig(IN JNIEnv *env, OUT char *pBufOut)
         char *pMD5ThisPackage = Convert2HumenReadable(env, objdigestResult);
         if (pMD5ThisPackage)
         {
-            MYLOGI("getSelfMD5Sig ThisPackage Sig MD5 from NDK: %s", pMD5ThisPackage);
             strcpy(pBufOut, pMD5ThisPackage);
             delete[] pMD5ThisPackage;
         }
-    } else
-    MYLOGE("objdigestResult error");
+    }
+    return true;
 }
 /**
  * 获取IMSI（SubscriberId）
@@ -469,7 +467,7 @@ bool getIMSI(JNIEnv *env, char *pOut)
         MYLOGI("getIMSI == null");
         return false;
     }
-    const char* pSubscriberId = env->GetStringUTFChars(SubscriberId, 0);
+    const char* pSubscriberId = env->GetStringUTFChars(SubscriberId, JNI_FALSE);
     if(pSubscriberId == NULL)
         return false;
 
@@ -517,7 +515,7 @@ bool getIMEI(JNIEnv *env, char *pOut)
     }
     jstring deviceid = (jstring)env->CallObjectMethod(telephonymanager, getDeviceId);
 
-    const char* pDeviceid = env->GetStringUTFChars(deviceid, 0);
+    const char* pDeviceid = env->GetStringUTFChars(deviceid, JNI_FALSE);
     if(pDeviceid == NULL)
         return false;
 
@@ -565,7 +563,7 @@ bool getSimSerialNumber(JNIEnv *env, char *pOut)
     }
     jstring deviceid = (jstring)env->CallObjectMethod(telephonymanager, getDeviceId);
 
-    const char* pDeviceid = env->GetStringUTFChars(deviceid, 0);
+    const char* pDeviceid = env->GetStringUTFChars(deviceid, JNI_FALSE);
     if(pDeviceid == NULL)
         return false;
 
@@ -618,7 +616,7 @@ bool getAndroidID(IN JNIEnv *env, OUT char *pBufOut)
     if (ooo == NULL) {
         return false;
     }
-    const char *pResult = env->GetStringUTFChars(ooo, 0);
+    const char *pResult = env->GetStringUTFChars(ooo, JNI_FALSE);
     if (pResult == NULL) {
         return false;
     }
@@ -654,7 +652,7 @@ bool getPackageName(IN JNIEnv *env, OUT char *pBufOut)
         MYLOGI("str_PackageName == NULL");
         return false;
     }
-    const char* pPackaageName = env->GetStringUTFChars(str_PackageName, false);
+    const char* pPackaageName = env->GetStringUTFChars(str_PackageName, JNI_FALSE);
     if (pPackaageName == NULL){
         MYLOGI("pPackaageName == NULL");
         return false;
@@ -823,7 +821,7 @@ bool getStringMetaDate(IN JNIEnv *env, IN jstring metaName, OUT char *pOut)
         return false;
     }
 
-    const char* pStrReal = env->GetStringUTFChars(string_get, false);
+    const char* pStrReal = env->GetStringUTFChars(string_get, JNI_FALSE);
     if(!pStrReal){
         return false;
     }
